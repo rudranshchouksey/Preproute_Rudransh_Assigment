@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 export interface TestData {
   id: string;
@@ -13,7 +13,7 @@ interface TestTableProps {
   isLoading: boolean;
 }
 
-export const TestTable: React.FC<TestTableProps> = ({ tests, isLoading }) => {
+export const TestTable = ({ tests, isLoading }: TestTableProps) => {
   if (isLoading) {
     return (
       <div className="card w-full p-12 flex justify-center items-center">
@@ -50,11 +50,11 @@ export const TestTable: React.FC<TestTableProps> = ({ tests, isLoading }) => {
                 <td className="px-6 py-4 text-gray-600">{test.subject}</td>
                 <td className="px-6 py-4">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    test.status === 'live' ? 'bg-green-100 text-green-800' : 
-                    test.status === 'draft' ? 'bg-amber-100 text-amber-800' : 
+                    (test.status || 'draft') === 'live' ? 'bg-green-100 text-green-800' : 
+                    (test.status || 'draft') === 'draft' ? 'bg-amber-100 text-amber-800' : 
                     'bg-gray-100 text-gray-800'
                   }`}>
-                    {test.status.charAt(0).toUpperCase() + test.status.slice(1)}
+                    {(test.status || 'draft').charAt(0).toUpperCase() + (test.status || 'draft').slice(1)}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-gray-500 text-sm">{new Date(test.creationDate).toLocaleDateString()}</td>

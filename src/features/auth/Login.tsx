@@ -15,7 +15,7 @@ export const Login = () => {
         userId: data.username,
         password: data.password,
       });
-      const token = response.data.token || response.data.jwt;
+      const token = response.data?.data?.token || response.data?.token || response.data?.jwt;
       if (token) {
         localStorage.setItem('token', token);
         navigate('/');

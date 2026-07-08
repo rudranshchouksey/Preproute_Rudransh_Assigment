@@ -112,18 +112,17 @@ export const TestForm = () => {
     try {
       const payload = {
         name: data.name,
-        subjectId: data.subjectId,
-        topicIds: data.topicIds?.map((t: Option) => t.value) || [],
-        subTopicIds: data.subTopicIds?.map((t: Option) => t.value) || [],
-        duration: data.duration,
-        numQuestions: data.numQuestions,
-        totalMarks: data.totalMarks,
+        subject: data.subjectId,
+        topics: data.topicIds?.map((t: Option) => t.value) || [],
+        sub_topics: data.subTopicIds?.map((t: Option) => t.value) || [],
+        total_time: data.duration,
+        total_questions: data.numQuestions,
+        total_marks: data.totalMarks,
         difficulty: data.difficulty,
-        markingScheme: {
-          correct: data.markingCorrect,
-          wrong: data.markingWrong,
-          unattempted: data.markingUnattempted
-        }
+        type: 'practice', // Required by backend
+        correct_marks: data.markingCorrect,
+        wrong_marks: data.markingWrong,
+        unattempt_marks: data.markingUnattempted
       };
 
       let testId = id;
@@ -139,8 +138,14 @@ export const TestForm = () => {
       } else {
         console.error("Failed to extract Test ID from response");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving test", error);
+      const apiErrors = error.response?.data?.errors;
+      if (apiErrors && Array.isArray(apiErrors)) {
+        alert("Validation Failed:\n" + apiErrors.map((e: any) => `- ${e.msg}`).join("\n"));
+      } else {
+        alert("Error saving test: " + (error.response?.data?.message || error.message));
+      }
     }
   };
 
