@@ -26,7 +26,10 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       ],
       correctOptionId: '1',
       mediaUrl: '',
-      explanation: ''
+      explanation: '',
+      difficulty: '',
+      topicId: '',
+      subTopicId: ''
     }
   });
 
@@ -45,7 +48,10 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
         ],
         correctOptionId: '1',
         mediaUrl: '',
-        explanation: ''
+        explanation: '',
+        difficulty: '',
+        topicId: '',
+        subTopicId: ''
       });
     }
   }, [initialData, reset]);
@@ -114,7 +120,37 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
         </div>
       </div>
 
-      <div className="flex justify-between pt-6 border-t border-gray-100">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t border-gray-100 mt-6">
+        <div>
+          <label className="block text-sm font-medium text-secondary mb-1">Difficulty (Optional)</label>
+          <select {...register('difficulty')} className="input-field">
+            <option value="">Select difficulty...</option>
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="difficult">Difficult</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-secondary mb-1">Topic (Optional)</label>
+          <input
+            type="text"
+            {...register('topicId')}
+            className="input-field"
+            placeholder="Topic ID or Name"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-secondary mb-1">Sub-Topic (Optional)</label>
+          <input
+            type="text"
+            {...register('subTopicId')}
+            className="input-field"
+            placeholder="Sub-Topic ID or Name"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-between pt-6 border-t border-gray-100 mt-6">
         <button 
           type="button" 
           onClick={() => { onClear(); reset(); }}

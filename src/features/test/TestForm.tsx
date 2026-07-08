@@ -108,7 +108,7 @@ export const TestForm = () => {
     fetchSubTopics();
   }, [selectedTopics, setValue]);
 
-  const onSubmit = async (data: Record<string, any>) => {
+  const onSubmit = async (data: Record<string, any>, mode: 'draft' | 'next' = 'next') => {
     try {
       const payload = {
         name: data.name,
@@ -119,7 +119,7 @@ export const TestForm = () => {
         total_questions: data.numQuestions,
         total_marks: data.totalMarks,
         difficulty: data.difficulty,
-        type: 'practice', // Required by backend
+        type: data.type || 'practice',
         correct_marks: data.markingCorrect,
         wrong_marks: data.markingWrong,
         unattempt_marks: data.markingUnattempted
@@ -134,7 +134,11 @@ export const TestForm = () => {
       }
 
       if (testId) {
-        navigate(`/test/${testId}/questions`);
+        if (mode === 'draft') {
+          navigate('/');
+        } else {
+          navigate(`/test/${testId}/questions`);
+        }
       } else {
         console.error("Failed to extract Test ID from response");
       }
@@ -162,7 +166,7 @@ export const TestForm = () => {
         <p className="text-gray-500 mt-1">Configure test details, topics, and marking scheme.</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="card space-y-8">
+      <form onSubmit={handleSubmit((d) => onSubmit(d, 'next'))} className="card space-y-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           
           {/* Left Column */}
@@ -227,6 +231,20 @@ export const TestForm = () => {
             />
 
             <div>
+              <label className="block text-sm font-medium text-secondary mb-1">Test Type *</label>
+              <select
+                {...register("type", { required: "Type is required" })}
+                className={`input-field ${errors.type ? 'border-red-500' : ''}`}
+                defaultValue="practice"
+              >
+                <option value="practice">Practice</option>
+                <option value="mock">Mock Test</option>
+                <option value="exam">Exam</option>
+              </select>
+              {errors.type && <p className="text-red-500 text-xs mt-1">{(errors.type as any).message}</p>}
+            </div>
+
+            <div>
               <label className="block text-sm font-medium text-secondary mb-2">Test Difficulty Level</label>
               <div className="flex gap-4">
                 {['Easy', 'Medium', 'Difficult'].map((level) => (
@@ -269,11 +287,18 @@ export const TestForm = () => {
         </div>
 
         <div className="flex justify-end pt-4 border-t border-gray-100">
-          <button type="button" onClick={() => navigate('/')} className="px-6 py-2 text-gray-600 hover:text-secondary font-medium mr-4">
+          <button type="button" onClick={() => navigate('/')} className="px-6 py-2 text-gray-600 hover:text-secondary font-medium mr-auto">
             Cancel
           </button>
+          <button 
+            type="button" 
+            onClick={handleSubmit((d) => onSubmit(d, 'draft'))}
+            className="px-6 py-2 text-brand hover:text-brand-dark font-medium mr-4 border border-brand/30 rounded-lg hover:bg-brand/5"
+          >
+            Save as Draft
+          </button>
           <button type="submit" className="btn-primary px-8">
-            Next
+            Next: Add Questions
           </button>
         </div>
       </form>

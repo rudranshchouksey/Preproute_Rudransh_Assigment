@@ -9,6 +9,9 @@ export interface QuestionDraft {
   correctOptionId: string;
   mediaUrl?: string;
   explanation?: string;
+  difficulty?: string;
+  topicId?: string;
+  subTopicId?: string;
 }
 
 export interface BulkQuestionPayload {

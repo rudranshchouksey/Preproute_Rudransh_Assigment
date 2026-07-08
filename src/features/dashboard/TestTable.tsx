@@ -1,5 +1,5 @@
-
-
+import { Link } from 'react-router-dom';
+import { Edit3, Eye, Trash2 } from 'lucide-react';
 export interface TestData {
   id: string;
   name: string;
@@ -11,9 +11,10 @@ export interface TestData {
 interface TestTableProps {
   tests: TestData[];
   isLoading: boolean;
+  onDelete?: (id: string) => void;
 }
 
-export const TestTable = ({ tests, isLoading }: TestTableProps) => {
+export const TestTable = ({ tests, isLoading, onDelete }: TestTableProps) => {
   if (isLoading) {
     return (
       <div className="card w-full p-12 flex justify-center items-center">
@@ -59,7 +60,21 @@ export const TestTable = ({ tests, isLoading }: TestTableProps) => {
                 </td>
                 <td className="px-6 py-4 text-gray-500 text-sm">{new Date(test.creationDate).toLocaleDateString()}</td>
                 <td className="px-6 py-4 text-right">
-                  <button className="text-brand hover:text-brand-dark font-medium text-sm">Edit</button>
+                  <div className="flex justify-end space-x-2">
+                    <Link to={`/test/${test.id || (test as any)._id}/publish`} className="p-1.5 text-gray-400 hover:text-brand bg-gray-50 hover:bg-brand/10 rounded-md transition-colors" title="View">
+                      <Eye size={16} />
+                    </Link>
+                    <Link to={`/test/edit/${test.id || (test as any)._id}`} className="p-1.5 text-gray-400 hover:text-amber-500 bg-gray-50 hover:bg-amber-50 rounded-md transition-colors" title="Edit">
+                      <Edit3 size={16} />
+                    </Link>
+                    <button 
+                      onClick={() => onDelete?.(test.id || (test as any)._id)} 
+                      className="p-1.5 text-gray-400 hover:text-red-500 bg-gray-50 hover:bg-red-50 rounded-md transition-colors" 
+                      title="Delete"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
