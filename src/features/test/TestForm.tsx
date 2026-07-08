@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 import { MultiSelect } from '../../components/Form/MultiSelect';
@@ -108,7 +108,7 @@ export const TestForm = () => {
     fetchSubTopics();
   }, [selectedTopics, setValue]);
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Record<string, any>) => {
     try {
       const payload = {
         name: data.name,

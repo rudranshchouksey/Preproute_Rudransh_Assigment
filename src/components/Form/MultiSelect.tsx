@@ -1,6 +1,5 @@
-import React from 'react';
-import Select, { Props as SelectProps } from 'react-select';
-import { Controller, Control } from 'react-hook-form';
+import Select, { type Props as SelectProps } from 'react-select';
+import { Controller, type Control } from 'react-hook-form';
 
 interface Option {
   value: string | number;
@@ -16,7 +15,7 @@ interface MultiSelectProps extends Omit<SelectProps<Option, true>, 'name'> {
   error?: string;
 }
 
-export const MultiSelect: React.FC<MultiSelectProps> = ({
+export const MultiSelect = ({
   name,
   control,
   options,
@@ -25,7 +24,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   error,
   isDisabled,
   ...rest
-}) => {
+}: MultiSelectProps) => {
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-secondary mb-1">

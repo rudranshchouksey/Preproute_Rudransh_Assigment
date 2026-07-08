@@ -1,12 +1,11 @@
-import React from 'react';
-import { UseFormRegister, FieldErrors } from 'react-hook-form';
+import type { UseFormRegister, FieldErrors } from 'react-hook-form';
 
 interface MarkingSchemeProps {
   register: UseFormRegister<any>;
   errors: FieldErrors;
 }
 
-export const MarkingScheme: React.FC<MarkingSchemeProps> = ({ register, errors }) => {
+export const MarkingScheme = ({ register, errors }: MarkingSchemeProps) => {
   return (
     <div className="w-full">
       <label className="block text-sm font-medium text-secondary mb-2">

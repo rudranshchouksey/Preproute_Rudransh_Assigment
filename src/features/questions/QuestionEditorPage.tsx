@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CheckCircle2, ChevronRight, Save } from 'lucide-react';
+import { CheckCircle2, Save } from 'lucide-react';
 import api from '../../services/api';
 import { QuestionForm } from './QuestionForm';
-import { QuestionDraft, BulkQuestionPayload } from './types';
+import type { QuestionDraft, BulkQuestionPayload } from './types';
 
 export const QuestionEditorPage = () => {
   const { id } = useParams();

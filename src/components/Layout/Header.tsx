@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bell, User } from 'lucide-react';
 
 export const Header = () => {

@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { QuestionDraft } from './types';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import type { QuestionDraft } from './types';
 
 interface QuestionFormProps {
   initialData: QuestionDraft | null;
@@ -15,7 +15,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   onClear,
   questionNumber
 }) => {
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<QuestionDraft>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<QuestionDraft>({
     defaultValues: initialData || {
       stem: '',
       options: [

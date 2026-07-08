@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://admin-moderator-backend-staging.up.railway.app/api',
+  // Using relative path so Vite proxy catches it and bypasses CORS locally
+  baseURL: import.meta.env.PROD ? 'https://admin-moderator-backend-staging.up.railway.app/api' : '/api',
   headers: {
     'Content-Type': 'application/json',
   },

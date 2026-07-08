@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
@@ -8,11 +8,11 @@ export const Login = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const onSubmit = async (data: any) => {
+  const onSubmit = async (data: Record<string, any>) => {
     try {
       setError('');
       const response = await api.post('/auth/login', {
-        username: data.username,
+        userId: data.username,
         password: data.password,
       });
       const token = response.data.token || response.data.jwt;
