@@ -9,6 +9,5 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Placeholders for remaining unimplemented routes
-export const TestQuestions = () => <div className="card text-center p-12">Test Questions Placeholder</div>;
 export const TestPublish = () => <div className="card text-center p-12">Publish Test Placeholder</div>;
 export const TestTracking = () => <div className="card text-center p-12">Test Tracking Placeholder</div>;

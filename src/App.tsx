@@ -3,8 +3,8 @@ import { Login } from './features/auth/Login';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { MainLayout } from './components/Layout/MainLayout';
 import { TestForm } from './features/test/TestForm';
+import { QuestionEditorPage } from './features/questions/QuestionEditorPage';
 import {
-  TestQuestions,
   TestPublish,
   TestTracking,
   ProtectedRoute
@@ -27,11 +27,12 @@ function App() {
             }
           >
             <Route path="/" element={<Dashboard />} />
-            {/* Unified TestForm for Create and Edit */}
             <Route path="/test/create" element={<TestForm />} />
             <Route path="/test/edit/:id" element={<TestForm />} />
             
-            <Route path="/test/:id/questions" element={<TestQuestions />} />
+            {/* Added QuestionEditorPage */}
+            <Route path="/test/:id/questions" element={<QuestionEditorPage />} />
+            
             <Route path="/test/:id/publish" element={<TestPublish />} />
             <Route path="/test/tracking" element={<TestTracking />} />
           </Route>
