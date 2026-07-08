@@ -2,9 +2,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Login } from './features/auth/Login';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { MainLayout } from './components/Layout/MainLayout';
+import { TestForm } from './features/test/TestForm';
 import {
-  TestCreate,
-  TestEdit,
   TestQuestions,
   TestPublish,
   TestTracking,
@@ -28,8 +27,10 @@ function App() {
             }
           >
             <Route path="/" element={<Dashboard />} />
-            <Route path="/test/create" element={<TestCreate />} />
-            <Route path="/test/edit/:id" element={<TestEdit />} />
+            {/* Unified TestForm for Create and Edit */}
+            <Route path="/test/create" element={<TestForm />} />
+            <Route path="/test/edit/:id" element={<TestForm />} />
+            
             <Route path="/test/:id/questions" element={<TestQuestions />} />
             <Route path="/test/:id/publish" element={<TestPublish />} />
             <Route path="/test/tracking" element={<TestTracking />} />
