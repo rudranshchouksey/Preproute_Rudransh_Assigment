@@ -1,16 +1,17 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 
-export const Login = () => <div className="p-8">Login Page (Public)</div>;
-export const Dashboard = () => <div className="p-8">Dashboard (Protected)</div>;
-export const TestCreate = () => <div className="p-8">Create Test (Protected)</div>;
-export const TestEdit = () => <div className="p-8">Edit Test (Protected)</div>;
-export const TestQuestions = () => <div className="p-8">Test Questions (Protected)</div>;
-export const TestPublish = () => <div className="p-8">Publish Test (Protected)</div>;
-
-// A simple protected route wrapper
+// Protected Route Wrapper
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
-  // For bootstrapping, we'll just allow it if no token, or redirect if strict.
+  // For development, you might want to uncomment this if auth is fully connected
   // if (!token) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
+
+// Placeholders for remaining unimplemented routes
+export const TestCreate = () => <div className="card text-center p-12">Create Test Placeholder</div>;
+export const TestEdit = () => <div className="card text-center p-12">Edit Test Placeholder</div>;
+export const TestQuestions = () => <div className="card text-center p-12">Test Questions Placeholder</div>;
+export const TestPublish = () => <div className="card text-center p-12">Publish Test Placeholder</div>;
+export const TestTracking = () => <div className="card text-center p-12">Test Tracking Placeholder</div>;

@@ -1,63 +1,39 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Login } from './features/auth/Login';
+import { Dashboard } from './features/dashboard/Dashboard';
+import { MainLayout } from './components/Layout/MainLayout';
 import {
-  Login,
-  Dashboard,
   TestCreate,
   TestEdit,
   TestQuestions,
   TestPublish,
+  TestTracking,
   ProtectedRoute
 } from './pages';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50 text-secondary">
+      <div className="font-sans text-secondary">
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
           
-          {/* Protected Routes */}
+          {/* Protected Routes inside MainLayout */}
           <Route 
-            path="/" 
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <MainLayout />
               </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/test/create" 
-            element={
-              <ProtectedRoute>
-                <TestCreate />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/test/edit/:id" 
-            element={
-              <ProtectedRoute>
-                <TestEdit />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/test/:id/questions" 
-            element={
-              <ProtectedRoute>
-                <TestQuestions />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/test/:id/publish" 
-            element={
-              <ProtectedRoute>
-                <TestPublish />
-              </ProtectedRoute>
-            } 
-          />
+            }
+          >
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/test/create" element={<TestCreate />} />
+            <Route path="/test/edit/:id" element={<TestEdit />} />
+            <Route path="/test/:id/questions" element={<TestQuestions />} />
+            <Route path="/test/:id/publish" element={<TestPublish />} />
+            <Route path="/test/tracking" element={<TestTracking />} />
+          </Route>
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
