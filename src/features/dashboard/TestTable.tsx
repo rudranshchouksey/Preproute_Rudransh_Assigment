@@ -51,11 +51,11 @@ export const TestTable = ({ tests, isLoading, onDelete }: TestTableProps) => {
                 <td className="px-6 py-4 text-gray-600">{test.subject}</td>
                 <td className="px-6 py-4">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    (test.status || 'draft') === 'live' ? 'bg-green-100 text-green-800' : 
-                    (test.status || 'draft') === 'draft' ? 'bg-amber-100 text-amber-800' : 
+                    (test.status || 'draft').toLowerCase() === 'live' ? 'bg-green-100 text-green-800' : 
+                    (test.status || 'draft').toLowerCase() === 'draft' ? 'bg-amber-100 text-amber-800' : 
                     'bg-gray-100 text-gray-800'
                   }`}>
-                    {(test.status || 'draft').charAt(0).toUpperCase() + (test.status || 'draft').slice(1)}
+                    {(test.status || 'draft').charAt(0).toUpperCase() + (test.status || 'draft').slice(1).toLowerCase()}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-gray-500 text-sm">{new Date(test.creationDate).toLocaleDateString()}</td>

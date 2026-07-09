@@ -118,9 +118,9 @@ export const TestForm = () => {
         total_time: data.duration,
         total_questions: data.numQuestions,
         total_marks: data.totalMarks,
-        difficulty: data.difficulty || 'medium',
-        status: 'draft',
-        type: data.type || 'practice',
+        difficulty: (data.difficulty || 'medium').toUpperCase(),
+        status: 'DRAFT',
+        type: (data.type || 'practice').toUpperCase(),
         correct_marks: data.markingCorrect,
         wrong_marks: data.markingWrong,
         unattempt_marks: data.markingUnattempted
