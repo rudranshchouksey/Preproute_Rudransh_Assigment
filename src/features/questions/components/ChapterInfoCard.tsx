@@ -1,6 +1,6 @@
 import { Edit3, Clock, Target, Hash } from 'lucide-react';
-import { Card } from '../../ui/Card';
-import { Badge } from '../../ui/Badge';
+import { Card } from '../../../components/ui/Card';
+import { Badge } from '../../../components/ui/Badge';
 
 interface ChapterInfoCardProps {
   testName: string;
