@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CheckCircle2, Save } from 'lucide-react';
 import api from '../../services/api';
 import { QuestionForm } from './QuestionForm';
+import { TopHeader } from './components/TopHeader';
+import { QuestionSidebar } from './components/QuestionSidebar';
 import type { QuestionDraft, BulkQuestionPayload } from './types';
 
 export const QuestionEditorPage = () => {
@@ -64,7 +65,12 @@ export const QuestionEditorPage = () => {
     // Basic validation: ensure all questions are filled out
     const isComplete = questions.every(q => q !== null);
     if (!isComplete) {
-      setError("Please complete all questions before saving.");
+      setError("Please complete all questions before publishing.");
+      // Optional: auto-navigate to the first incomplete question
+      const firstIncomplete = questions.findIndex(q => q === null);
+      if (firstIncomplete !== -1) {
+        setActiveIndex(firstIncomplete);
+      }
       return;
     }
     
@@ -78,7 +84,6 @@ export const QuestionEditorPage = () => {
       };
       
       await api.post('/questions/bulk', payload);
-      // On absolute success, smoothly advance
       navigate(`/test/${id}/publish`);
       
     } catch (err: any) {
@@ -90,88 +95,38 @@ export const QuestionEditorPage = () => {
   };
 
   return (
-    <div className="flex h-[calc(100vh-8rem)] bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      
-      {/* Left Sidebar Panel - Question Navigation */}
-      <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
-        <div className="p-4 border-b border-gray-200 bg-white">
-          <h3 className="font-semibold text-secondary">Question Navigation</h3>
-          <p className="text-xs text-gray-500 mt-1">
-            {questions.filter(q => q !== null).length} of {numQuestions} completed
-          </p>
+    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden font-sans">
+      <TopHeader onPublish={handleBulkSubmit} isPublishing={isSubmitting} />
+
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 text-sm text-center border-b border-red-100 z-20 shadow-sm font-medium">
+          {error}
         </div>
-        
-        <div className="flex-1 overflow-y-auto p-2 space-y-1">
-          {questions.map((q, idx) => {
-            const isActive = activeIndex === idx;
-            const isCompleted = q !== null;
-            
-            return (
-              <button
-                key={idx}
-                onClick={() => setActiveIndex(idx)}
-                className={`w-full text-left px-4 py-3 rounded-lg flex items-center justify-between transition-colors ${
-                  isActive 
-                    ? 'bg-brand text-white shadow-md' 
-                    : 'hover:bg-gray-100 text-gray-600'
-                }`}
-              >
-                <span className="font-medium text-sm">Question {idx + 1}</span>
-                {isCompleted && (
-                  <CheckCircle2 size={16} className={isActive ? 'text-white' : 'text-green-500'} />
-                )}
-              </button>
-            );
-          })}
-        </div>
+      )}
+
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row relative">
+        {/* Left Sidebar */}
+        <QuestionSidebar 
+          questions={questions}
+          activeIndex={activeIndex}
+          numQuestions={numQuestions}
+          onSelect={setActiveIndex}
+        />
+
+        {/* Main Content Area (Includes Right Sidebar inside QuestionForm) */}
+        <main className="flex-1 overflow-hidden relative">
+          <QuestionForm
+            key={activeIndex} // Force re-mount when index changes
+            questionNumber={activeIndex + 1}
+            initialData={questions[activeIndex] || null}
+            onSave={handleSaveQuestion}
+            onClear={handleClearQuestion}
+            testName={testName}
+            numQuestions={numQuestions}
+          />
+        </main>
       </div>
-
-      {/* Right Main Work Canvas */}
-      <div className="flex-1 flex flex-col h-full bg-white relative">
-        {/* Active Test Metadata Banner */}
-        <div className="h-16 border-b border-gray-100 flex items-center justify-between px-8 bg-white shrink-0">
-          <div className="flex items-center space-x-2 text-sm">
-            <span className="text-gray-500 font-medium">Editing:</span>
-            <span className="text-brand font-semibold px-2 py-1 bg-brand/10 rounded-md">{testName}</span>
-          </div>
-          
-          <button 
-            onClick={handleBulkSubmit}
-            disabled={isSubmitting}
-            className="btn-primary flex items-center space-x-2 py-1.5 px-4 text-sm"
-          >
-            {isSubmitting ? (
-              <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
-            ) : (
-              <>
-                <Save size={16} />
-                <span>Save & Continue</span>
-              </>
-            )}
-          </button>
-        </div>
-        
-        {/* Error Banner */}
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 text-sm text-center border-b border-red-100">
-            {error}
-          </div>
-        )}
-
-        {/* Editor Area */}
-        <div className="flex-1 overflow-y-auto p-8 bg-gray-50/50">
-          <div className="max-w-3xl mx-auto">
-            <QuestionForm
-              key={activeIndex} // Force re-mount when index changes
-              questionNumber={activeIndex + 1}
-              initialData={questions[activeIndex] || null}
-              onSave={handleSaveQuestion}
-              onClear={handleClearQuestion}
-            />
-          </div>
-        </div>
-      </div>
-
     </div>
   );
 };

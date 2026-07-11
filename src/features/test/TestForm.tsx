@@ -118,9 +118,10 @@ export const TestForm = () => {
         total_time: data.duration,
         total_questions: data.numQuestions,
         total_marks: data.totalMarks,
-        difficulty: (data.difficulty || 'medium').toUpperCase(),
-        status: 'DRAFT',
-        type: (data.type || 'practice').toUpperCase(),
+        // The backend expects 'hard' instead of 'difficult', and currently only seems to accept 'mock' for type.
+        difficulty: data.difficulty === 'difficult' ? 'hard' : (data.difficulty || 'medium').toLowerCase(),
+        status: 'draft',
+        type: 'mock', // Forcing to 'mock' as the backend check constraint rejects 'practice' and 'exam'
         correct_marks: data.markingCorrect,
         wrong_marks: data.markingWrong,
         unattempt_marks: data.markingUnattempted
