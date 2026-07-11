@@ -99,24 +99,22 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
               </div>
               {errors.options && <p className="text-red-500 text-xs mt-2 font-medium">All options must be filled.</p>}
             </div>
+            <div className="mt-10 flex justify-between items-center pt-6 border-t border-gray-100">
+              <button 
+                type="button" 
+                onClick={() => { onClear(); reset(); }}
+                className="text-red-600 hover:text-red-700 font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
+              >
+                Clear Edits
+              </button>
+              <button 
+                type="submit" 
+                className="bg-brand text-white font-medium px-8 py-2.5 rounded-full hover:bg-brand-dark transition-colors shadow-md hover:shadow-lg"
+              >
+                Save & Continue
+              </button>
+            </div>
           </div>
-        </div>
-
-        {/* Bottom Floating Action Bar */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-gray-200 flex justify-between items-center z-10 lg:pl-8 lg:pr-8">
-          <button 
-            type="button" 
-            onClick={() => { onClear(); reset(); }}
-            className="text-red-600 hover:text-red-700 font-medium px-4 py-2 rounded-lg hover:bg-red-50 transition-colors"
-          >
-            Clear Edits
-          </button>
-          <button 
-            type="submit" 
-            className="bg-brand text-white font-medium px-8 py-2.5 rounded-full hover:bg-brand-dark transition-colors shadow-md hover:shadow-lg"
-          >
-            Save & Continue
-          </button>
         </div>
       </div>
 
