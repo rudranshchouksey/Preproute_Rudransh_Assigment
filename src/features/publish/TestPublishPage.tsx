@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { SchedulingControls } from './SchedulingControls';
 import { PageHeader } from '../../components/Layout/PageHeader';
-import { Card, CardContent } from '../../components/ui/Card';
+import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import type { QuestionDraft } from '../questions/types';
