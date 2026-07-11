@@ -1,4 +1,6 @@
 import React from 'react';
+import { Card } from './components/ui/Card';
+import { PageHeader } from './components/Layout/PageHeader';
 
 // Protected Route Wrapper
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -9,4 +11,15 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Placeholders for remaining unimplemented routes
-export const TestTracking = () => <div className="card text-center p-12">Test Tracking Placeholder</div>;
+export const TestTracking = () => (
+  <div className="max-w-6xl mx-auto space-y-6">
+    <PageHeader 
+      breadcrumbs={[{ label: 'Test Tracking' }]}
+      title="Test Tracking" 
+      description="Track performance and analytics for your published tests."
+    />
+    <Card className="text-center p-12 text-gray-500 font-medium">
+      Test Tracking is currently under development.
+    </Card>
+  </div>
+);

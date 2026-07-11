@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { QuestionForm } from './QuestionForm';
-import { TopHeader } from './components/TopHeader';
 import { QuestionSidebar } from './components/QuestionSidebar';
+import { PageHeader } from '../../components/Layout/PageHeader';
+import { Button } from '../../components/ui/Button';
 import type { QuestionDraft, BulkQuestionPayload } from './types';
 
 export const QuestionEditorPage = () => {
@@ -11,7 +12,7 @@ export const QuestionEditorPage = () => {
   const navigate = useNavigate();
   
   const [testName, setTestName] = useState<string>('Loading...');
-  const [numQuestions, setNumQuestions] = useState<number>(10); // default
+  const [numQuestions, setNumQuestions] = useState<number>(10);
   
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -19,14 +20,12 @@ export const QuestionEditorPage = () => {
   const [error, setError] = useState<string>('');
 
   useEffect(() => {
-    // Fetch test metadata to get numQuestions and testName
     const fetchTestMeta = async () => {
       try {
         const res = await api.get(`/tests/${id}`);
         const data = res.data.data || res.data;
         setTestName(data.name || `Test ${id}`);
         
-        // Initialize empty array based on numQuestions
         const total = data.numQuestions || 10;
         setNumQuestions(total);
         
@@ -37,7 +36,7 @@ export const QuestionEditorPage = () => {
         console.error("Failed to fetch test metadata", err);
         setTestName(`Test ${id}`);
         if (questions.length === 0) {
-          setQuestions(Array(10).fill(null)); // fallback
+          setQuestions(Array(10).fill(null));
         }
       }
     };
@@ -49,7 +48,6 @@ export const QuestionEditorPage = () => {
     updatedQuestions[activeIndex] = data;
     setQuestions(updatedQuestions);
     
-    // Auto-advance if not at the end
     if (activeIndex < numQuestions - 1) {
       setActiveIndex(activeIndex + 1);
     }
@@ -57,16 +55,14 @@ export const QuestionEditorPage = () => {
 
   const handleClearQuestion = () => {
     const updatedQuestions = [...questions];
-    updatedQuestions[activeIndex] = null as any; // Clear data
+    updatedQuestions[activeIndex] = null as any;
     setQuestions(updatedQuestions);
   };
 
   const handleBulkSubmit = async () => {
-    // Basic validation: ensure all questions are filled out
     const isComplete = questions.every(q => q !== null);
     if (!isComplete) {
       setError("Please complete all questions before publishing.");
-      // Optional: auto-navigate to the first incomplete question
       const firstIncomplete = questions.findIndex(q => q === null);
       if (firstIncomplete !== -1) {
         setActiveIndex(firstIncomplete);
@@ -95,29 +91,45 @@ export const QuestionEditorPage = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50 overflow-hidden font-sans">
-      <TopHeader onPublish={handleBulkSubmit} isPublishing={isSubmitting} />
+    <div className="flex flex-col h-full font-sans">
+      <div className="shrink-0 mb-6">
+        <PageHeader 
+          breadcrumbs={[
+            { label: 'Test Creation', href: '/test/create' },
+            { label: 'Edit Test', href: `/test/edit/${id}` },
+            { label: 'Add Questions' }
+          ]}
+          title={`Edit Questions: ${testName}`}
+          action={
+            <Button onClick={handleBulkSubmit} isLoading={isSubmitting}>
+              Publish Test
+            </Button>
+          }
+        />
+      </div>
 
-      {/* Error Banner */}
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 text-sm text-center border-b border-red-100 z-20 shadow-sm font-medium">
+        <div className="bg-red-50 text-red-600 mb-6 p-3 rounded-lg text-sm text-center border border-red-100 font-medium shrink-0">
           {error}
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden flex-col md:flex-row relative">
+      {/* 3-column Layout structure is created here with flex */}
+      <div className="flex flex-1 overflow-hidden flex-col md:flex-row gap-6 pb-6 min-h-[600px]">
         {/* Left Sidebar */}
-        <QuestionSidebar 
-          questions={questions}
-          activeIndex={activeIndex}
-          numQuestions={numQuestions}
-          onSelect={setActiveIndex}
-        />
+        <div className="w-full md:w-72 shrink-0">
+          <QuestionSidebar 
+            questions={questions}
+            activeIndex={activeIndex}
+            numQuestions={numQuestions}
+            onSelect={setActiveIndex}
+          />
+        </div>
 
-        {/* Main Content Area (Includes Right Sidebar inside QuestionForm) */}
-        <main className="flex-1 overflow-hidden relative">
+        {/* Main Content Area (which itself contains the Form and Right Sidebar) */}
+        <div className="flex-1 overflow-hidden min-w-0 bg-white rounded-xl shadow-sm border border-gray-100">
           <QuestionForm
-            key={activeIndex} // Force re-mount when index changes
+            key={activeIndex}
             questionNumber={activeIndex + 1}
             initialData={questions[activeIndex] || null}
             onSave={handleSaveQuestion}
@@ -125,7 +137,7 @@ export const QuestionEditorPage = () => {
             testName={testName}
             numQuestions={numQuestions}
           />
-        </main>
+        </div>
       </div>
     </div>
   );

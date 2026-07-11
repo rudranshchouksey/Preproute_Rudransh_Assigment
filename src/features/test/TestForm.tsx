@@ -4,6 +4,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../services/api';
 import { MultiSelect } from '../../components/Form/MultiSelect';
 import { MarkingScheme } from './MarkingScheme';
+import { PageHeader } from '../../components/Layout/PageHeader';
+import { Card, CardContent } from '../../components/ui/Card';
+import { Input } from '../../components/ui/Input';
+import { Select } from '../../components/ui/Select';
+import { Label } from '../../components/ui/Label';
+import { Button } from '../../components/ui/Button';
 
 interface Option {
   value: string | number;
@@ -23,21 +29,17 @@ export const TestForm = () => {
   
   const [isLoading, setIsLoading] = useState(false);
   
-  // Watchers for chained API calls
   const selectedSubject = watch('subjectId');
   const selectedTopics = watch('topicIds') as Option[] | undefined;
 
-  // 1. Fetch Subjects on Mount (and fetch Test Data if Edit Mode)
   useEffect(() => {
     const fetchInitialData = async () => {
       setIsLoading(true);
       try {
-        // Fetch subjects
         const subRes = await api.get('/subjects').catch(() => ({ data: [] }));
         const subData = Array.isArray(subRes.data) ? subRes.data : subRes.data.data || [];
         setSubjects(subData.map((s: any) => ({ value: s.id || s._id, label: s.name })));
 
-        // If edit mode, fetch test details and pre-populate
         if (isEditMode) {
           const testRes = await api.get(`/tests/${id}`).catch(() => null);
           if (testRes && testRes.data) {
@@ -51,9 +53,6 @@ export const TestForm = () => {
             setValue('markingCorrect', data.markingScheme?.correct || 5);
             setValue('markingWrong', data.markingScheme?.wrong || -1);
             setValue('markingUnattempted', data.markingScheme?.unattempted || 0);
-            
-            // For topics and subtopics, we might need to map them back to Option[] format.
-            // Simplified for now, assuming the API returns matching structures.
           }
         }
       } catch (error) {
@@ -65,7 +64,6 @@ export const TestForm = () => {
     fetchInitialData();
   }, [id, isEditMode, setValue]);
 
-  // 2. Fetch Topics when Subject changes
   useEffect(() => {
     if (!selectedSubject) {
       setTopics([]);
@@ -86,7 +84,6 @@ export const TestForm = () => {
     fetchTopics();
   }, [selectedSubject, setValue]);
 
-  // 3. Fetch Sub-Topics when Topics change
   useEffect(() => {
     if (!selectedTopics || selectedTopics.length === 0) {
       setSubTopics([]);
@@ -118,10 +115,9 @@ export const TestForm = () => {
         total_time: data.duration,
         total_questions: data.numQuestions,
         total_marks: data.totalMarks,
-        // The backend expects 'hard' instead of 'difficult', and currently only seems to accept 'mock' for type.
         difficulty: data.difficulty === 'difficult' ? 'hard' : (data.difficulty || 'medium').toLowerCase(),
         status: 'draft',
-        type: 'mock', // Forcing to 'mock' as the backend check constraint rejects 'practice' and 'exam'
+        type: 'mock', 
         correct_marks: data.markingCorrect,
         wrong_marks: data.markingWrong,
         unattempt_marks: data.markingUnattempted
@@ -132,7 +128,7 @@ export const TestForm = () => {
         await api.put(`/tests/${id}`, payload);
       } else {
         const res = await api.post('/tests', payload);
-        testId = res.data.id || res.data._id || res.data.data?.id; // Map returned test-uuid
+        testId = res.data.id || res.data._id || res.data.data?.id;
       }
 
       if (testId) {
@@ -159,150 +155,148 @@ export const TestForm = () => {
     return <div className="p-12 text-center text-gray-500">Loading form...</div>;
   }
 
+  const breadcrumbs = [
+    { label: 'Test Creation', href: '/' },
+    { label: isEditMode ? 'Edit Test' : 'Create Test' }
+  ];
+
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-secondary tracking-tight">
-          {isEditMode ? 'Edit Test Configuration' : 'Create New Test'}
-        </h1>
-        <p className="text-gray-500 mt-1">Configure test details, topics, and marking scheme.</p>
-      </div>
+    <div className="max-w-5xl mx-auto space-y-6">
+      <PageHeader 
+        breadcrumbs={breadcrumbs}
+        title={isEditMode ? 'Edit Test Configuration' : 'Create New Test'}
+        description="Configure test details, topics, and marking scheme."
+      />
 
-      <form onSubmit={handleSubmit((d) => onSubmit(d, 'next'))} className="card space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <form onSubmit={handleSubmit((d) => onSubmit(d, 'next'))}>
+        <Card>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8">
+            {/* Left Column */}
+            <div className="space-y-6">
+              <div>
+                <Label>Subject *</Label>
+                <Select
+                  {...register("subjectId", { required: "Subject is required" })}
+                  error={(errors.subjectId as any)?.message}
+                >
+                  <option value="">Select a subject...</option>
+                  {subjects.map(s => (
+                    <option key={s.value} value={s.value}>{s.label}</option>
+                  ))}
+                </Select>
+              </div>
+
+              <MultiSelect
+                name="topicIds"
+                control={control}
+                options={topics}
+                label="Topics"
+                placeholder="Select topics..."
+                isDisabled={!selectedSubject || topics.length === 0}
+              />
+
+              <div>
+                <Label>Duration (Minutes) *</Label>
+                <Input
+                  type="number"
+                  {...register("duration", { required: "Duration is required", valueAsNumber: true })}
+                  error={(errors.duration as any)?.message}
+                  placeholder="e.g. 60"
+                />
+              </div>
+
+              <MarkingScheme register={register} errors={errors} />
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              <div>
+                <Label>Name of Test *</Label>
+                <Input
+                  type="text"
+                  {...register("name", { required: "Test name is required" })}
+                  error={(errors.name as any)?.message}
+                  placeholder="e.g. Midterm Mathematics"
+                />
+              </div>
+
+              <MultiSelect
+                name="subTopicIds"
+                control={control}
+                options={subTopics}
+                label="Sub Topics"
+                placeholder="Select sub-topics..."
+                isDisabled={!selectedTopics || selectedTopics.length === 0 || subTopics.length === 0}
+              />
+
+              <div>
+                <Label>Test Type *</Label>
+                <Select
+                  {...register("type", { required: "Type is required" })}
+                  error={(errors.type as any)?.message}
+                  defaultValue="practice"
+                >
+                  <option value="practice">Practice</option>
+                  <option value="mock">Mock Test</option>
+                  <option value="exam">Exam</option>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Test Difficulty Level</Label>
+                <div className="flex gap-4">
+                  {['Easy', 'Medium', 'Difficult'].map((level) => (
+                    <label key={level} className="flex items-center space-x-2 cursor-pointer group">
+                      <input
+                        type="radio"
+                        value={level.toLowerCase()}
+                        {...register("difficulty")}
+                        className="text-brand focus:ring-brand h-4 w-4 border-gray-300"
+                        defaultChecked={level === 'Medium'}
+                      />
+                      <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors font-medium">{level}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Number of Questions</Label>
+                  <Input
+                    type="number"
+                    {...register("numQuestions", { valueAsNumber: true })}
+                    placeholder="e.g. 50"
+                  />
+                </div>
+                <div>
+                  <Label>Total Marks</Label>
+                  <Input
+                    type="number"
+                    {...register("totalMarks", { valueAsNumber: true })}
+                    placeholder="e.g. 100"
+                  />
+                </div>
+              </div>
+            </div>
+          </CardContent>
           
-          {/* Left Column */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Subject *</label>
-              <select
-                {...register("subjectId", { required: "Subject is required" })}
-                className={`input-field ${errors.subjectId ? 'border-red-500' : ''}`}
-              >
-                <option value="">Select a subject...</option>
-                {subjects.map(s => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
-              {errors.subjectId && <p className="text-red-500 text-xs mt-1">{(errors.subjectId as any).message}</p>}
-            </div>
-
-            <MultiSelect
-              name="topicIds"
-              control={control}
-              options={topics}
-              label="Topics"
-              placeholder="Select topics..."
-              isDisabled={!selectedSubject || topics.length === 0}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Duration (Minutes) *</label>
-              <input
-                type="number"
-                {...register("duration", { required: "Duration is required", valueAsNumber: true })}
-                className={`input-field ${errors.duration ? 'border-red-500' : ''}`}
-                placeholder="e.g. 60"
-              />
-              {errors.duration && <p className="text-red-500 text-xs mt-1">{(errors.duration as any).message}</p>}
-            </div>
-
-            <MarkingScheme register={register} errors={errors} />
+          <div className="flex justify-end items-center px-6 py-5 border-t border-gray-100 bg-gray-50/50 rounded-b-xl gap-3">
+            <Button variant="ghost" type="button" onClick={() => navigate('/')} className="mr-auto">
+              Cancel
+            </Button>
+            <Button 
+              variant="outline" 
+              type="button" 
+              onClick={handleSubmit((d) => onSubmit(d, 'draft'))}
+            >
+              Save as Draft
+            </Button>
+            <Button type="submit">
+              Next: Add Questions
+            </Button>
           </div>
-
-          {/* Right Column */}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Name of Test *</label>
-              <input
-                type="text"
-                {...register("name", { required: "Test name is required" })}
-                className={`input-field ${errors.name ? 'border-red-500' : ''}`}
-                placeholder="e.g. Midterm Mathematics"
-              />
-              {errors.name && <p className="text-red-500 text-xs mt-1">{(errors.name as any).message}</p>}
-            </div>
-
-            <MultiSelect
-              name="subTopicIds"
-              control={control}
-              options={subTopics}
-              label="Sub Topics"
-              placeholder="Select sub-topics..."
-              isDisabled={!selectedTopics || selectedTopics.length === 0 || subTopics.length === 0}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-1">Test Type *</label>
-              <select
-                {...register("type", { required: "Type is required" })}
-                className={`input-field ${errors.type ? 'border-red-500' : ''}`}
-                defaultValue="practice"
-              >
-                <option value="practice">Practice</option>
-                <option value="mock">Mock Test</option>
-                <option value="exam">Exam</option>
-              </select>
-              {errors.type && <p className="text-red-500 text-xs mt-1">{(errors.type as any).message}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-secondary mb-2">Test Difficulty Level</label>
-              <div className="flex gap-4">
-                {['Easy', 'Medium', 'Difficult'].map((level) => (
-                  <label key={level} className="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      value={level.toLowerCase()}
-                      {...register("difficulty")}
-                      className="text-brand focus:ring-brand h-4 w-4"
-                      defaultChecked={level === 'Medium'}
-                    />
-                    <span className="text-sm text-gray-700">{level}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Number of Questions</label>
-                <input
-                  type="number"
-                  {...register("numQuestions", { valueAsNumber: true })}
-                  className="input-field"
-                  placeholder="e.g. 50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-secondary mb-1">Total Marks</label>
-                <input
-                  type="number"
-                  {...register("totalMarks", { valueAsNumber: true })}
-                  className="input-field"
-                  placeholder="e.g. 100"
-                />
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="flex justify-end pt-4 border-t border-gray-100">
-          <button type="button" onClick={() => navigate('/')} className="px-6 py-2 text-gray-600 hover:text-secondary font-medium mr-auto">
-            Cancel
-          </button>
-          <button 
-            type="button" 
-            onClick={handleSubmit((d) => onSubmit(d, 'draft'))}
-            className="px-6 py-2 text-brand hover:text-brand-dark font-medium mr-4 border border-brand/30 rounded-lg hover:bg-brand/5"
-          >
-            Save as Draft
-          </button>
-          <button type="submit" className="btn-primary px-8">
-            Next: Add Questions
-          </button>
-        </div>
+        </Card>
       </form>
     </div>
   );

@@ -1,5 +1,9 @@
 import { UseFormRegister } from 'react-hook-form';
 import type { QuestionDraft } from '../types';
+import { Input } from '../../../components/ui/Input';
+import { Select } from '../../../components/ui/Select';
+import { Label } from '../../../components/ui/Label';
+import { Textarea } from '../../../components/ui/Textarea';
 
 interface PropertiesSidebarProps {
   register: UseFormRegister<QuestionDraft>;
@@ -7,107 +11,102 @@ interface PropertiesSidebarProps {
 
 export const PropertiesSidebar: React.FC<PropertiesSidebarProps> = ({ register }) => {
   return (
-    <aside className="w-full lg:w-80 bg-white border-l border-gray-200 flex flex-col h-full shrink-0 shadow-sm z-10 hidden lg:flex">
-      <div className="p-5 border-b border-gray-100 bg-white z-10 shrink-0">
+    <aside className="w-full h-full flex flex-col hidden lg:flex">
+      <div className="p-5 border-b border-gray-200 bg-gray-50/50 z-10 shrink-0">
         <h3 className="font-semibold text-gray-900 text-lg">Properties</h3>
         <p className="text-sm text-gray-500 mt-1 font-medium">Configure question details</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-6 no-scrollbar">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
         {/* Topic & SubTopic */}
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Subject</label>
-            <select className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none">
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Subject</Label>
+            <Select>
               <option>Physics</option>
               <option>Chemistry</option>
               <option>Mathematics</option>
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Topic (Optional)</label>
-            <input
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Topic (Optional)</Label>
+            <Input
               type="text"
               {...register('topicId')}
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none"
               placeholder="e.g., Kinematics"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Sub-Topic (Optional)</label>
-            <input
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Sub-Topic (Optional)</Label>
+            <Input
               type="text"
               {...register('subTopicId')}
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none"
               placeholder="e.g., Motion in 1D"
             />
           </div>
         </div>
 
-        <div className="h-px bg-gray-100"></div>
+        <div className="h-px bg-gray-200"></div>
 
         {/* Difficulty & Type */}
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Difficulty (Optional)</label>
-            <select {...register('difficulty')} className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none">
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Difficulty (Optional)</Label>
+            <Select {...register('difficulty')}>
               <option value="">Select difficulty</option>
               <option value="easy">Easy</option>
               <option value="medium">Medium</option>
               <option value="difficult">Difficult</option>
-            </select>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Question Type</label>
-            <select className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none">
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Question Type</Label>
+            <Select>
               <option>Multiple Choice (Single Correct)</option>
               <option>Multiple Choice (Multiple Correct)</option>
               <option>Numerical</option>
-            </select>
+            </Select>
           </div>
         </div>
 
-        <div className="h-px bg-gray-100"></div>
+        <div className="h-px bg-gray-200"></div>
 
         {/* Scoring & Duration */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Marks</label>
-            <input type="number" defaultValue={4} className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none" />
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Marks</Label>
+            <Input type="number" defaultValue={4} />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">-ve Marks</label>
-            <input type="number" defaultValue={1} className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none" />
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">-ve Marks</Label>
+            <Input type="number" defaultValue={1} />
           </div>
           <div className="col-span-2">
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Duration (Secs)</label>
-            <input type="number" defaultValue={60} className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none" />
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Duration (Secs)</Label>
+            <Input type="number" defaultValue={60} />
           </div>
         </div>
 
-        <div className="h-px bg-gray-100"></div>
+        <div className="h-px bg-gray-200"></div>
 
         {/* Media & Explanation */}
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Media URL (Optional)</label>
-            <input
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Media URL (Optional)</Label>
+            <Input
               type="url"
               {...register('mediaUrl')}
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none"
               placeholder="https://..."
             />
           </div>
           
           <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Explanation (Optional)</label>
-            <textarea
+            <Label className="text-xs uppercase tracking-wider text-gray-500 mb-2">Explanation (Optional)</Label>
+            <Textarea
               {...register('explanation')}
-              rows={4}
-              className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-brand focus:border-brand block p-2.5 outline-none resize-none"
               placeholder="Explain the answer..."
             />
           </div>
