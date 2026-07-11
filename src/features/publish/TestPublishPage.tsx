@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { Edit3, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { Edit3, CheckCircle, Clock, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { SchedulingControls } from './SchedulingControls';
@@ -20,6 +20,7 @@ export const TestPublishPage = () => {
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -30,32 +31,36 @@ export const TestPublishPage = () => {
     }
   });
 
-  useEffect(() => {
-    const fetchConfiguration = async () => {
-      try {
-        setIsLoading(true);
-        const testRes = await api.get(`/tests/${id}`);
-        const data = testRes.data.data || testRes.data;
-        setTestData(data);
+  const fetchConfiguration = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const testRes = await api.get(`/tests/${id}`);
+      const data = testRes.data.data || testRes.data;
+      setTestData(data);
 
-        const questionIds = data.questionIds || [];
-        if (questionIds.length > 0) {
-          const qRes = await api.post('/questions/fetchBulk', { question_ids: questionIds }).catch(() => ({ data: [] }));
-          setQuestions(Array.isArray(qRes.data) ? qRes.data : qRes.data.data || []);
-        } else {
-          setQuestions([
-            { stem: 'What is the primary capital of France?', correctOptionId: '3', options: [{ id: '1', text: 'London' }, { id: '2', text: 'Berlin' }, { id: '3', text: 'Paris' }, { id: '4', text: 'Madrid' }] },
-            { stem: 'Which planet is known as the Red Planet?', correctOptionId: '1', options: [{ id: '1', text: 'Mars' }, { id: '2', text: 'Jupiter' }, { id: '3', text: 'Venus' }, { id: '4', text: 'Saturn' }] },
-          ] as QuestionDraft[]);
-        }
-      } catch (error) {
-        console.error("Failed to load publish data", error);
-        toast.error("Failed to load test configuration.");
-      } finally {
-        setIsLoading(false);
+      const questionIds = data.questionIds || [];
+      if (questionIds.length > 0) {
+        const qRes = await api.post('/questions/fetchBulk', { question_ids: questionIds }).catch(() => ({ data: [] }));
+        setQuestions(Array.isArray(qRes.data) ? qRes.data : qRes.data.data || []);
+      } else {
+        setQuestions([
+          { stem: 'What is the primary capital of France?', correctOptionId: '3', options: [{ id: '1', text: 'London' }, { id: '2', text: 'Berlin' }, { id: '3', text: 'Paris' }, { id: '4', text: 'Madrid' }] },
+          { stem: 'Which planet is known as the Red Planet?', correctOptionId: '1', options: [{ id: '1', text: 'Mars' }, { id: '2', text: 'Jupiter' }, { id: '3', text: 'Venus' }, { id: '4', text: 'Saturn' }] },
+        ] as QuestionDraft[]);
       }
-    };
+    } catch (err) {
+      console.error("Failed to load publish data", err);
+      setError("Failed to load test configuration.");
+      toast.error("Failed to load test configuration.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (id) fetchConfiguration();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const onConfirmPublish = async (formData: Record<string, any>) => {
@@ -69,13 +74,31 @@ export const TestPublishPage = () => {
       await api.put(`/tests/${id}`, payload);
       toast.success('Test published successfully!');
       navigate('/');
-    } catch (error: any) {
-      console.error("Failed to publish test", error);
-      toast.error(error.response?.data?.message || "Failed to publish test.");
+    } catch (err: any) {
+      console.error("Failed to publish test", err);
+      toast.error(err.response?.data?.message || "Failed to publish test.");
     } finally {
       setIsPublishing(false);
     }
   };
+
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6">
+        <PageHeader 
+          breadcrumbs={[{ label: 'Test Creation', href: '/' }, { label: 'Publish Test' }]}
+          title="Preview & Publish"
+        />
+        <div className="bg-red-50 border border-red-200 text-red-700 p-8 rounded-xl flex flex-col items-center justify-center space-y-4 max-w-2xl mx-auto mt-12">
+          <AlertCircle size={40} className="text-red-500" />
+          <p className="font-medium text-lg">{error}</p>
+          <Button onClick={fetchConfiguration}>
+            <RefreshCw size={16} className="mr-2" /> Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
