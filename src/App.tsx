@@ -3,8 +3,7 @@ import { Toaster } from 'react-hot-toast';
 import { Login } from './features/auth/Login';
 import { Dashboard } from './features/dashboard/Dashboard';
 import { MainLayout } from './components/Layout/MainLayout';
-import { TestForm } from './features/test/TestForm';
-import { QuestionEditorPage } from './features/questions/QuestionEditorPage';
+import { UnifiedTestEditor } from './features/test/UnifiedTestEditor';
 import { TestPublishPage } from './features/publish/TestPublishPage';
 import {
   TestTracking,
@@ -30,10 +29,9 @@ function App() {
               }
             >
               <Route path="/" element={<Dashboard />} />
-              <Route path="/test/create" element={<TestForm />} />
-              <Route path="/test/edit/:id" element={<TestForm />} />
-              
-              <Route path="/test/:id/questions" element={<QuestionEditorPage />} />
+              <Route path="/test/create" element={<UnifiedTestEditor />} />
+              <Route path="/test/edit/:id" element={<UnifiedTestEditor />} />
+              <Route path="/test/:id/questions" element={<UnifiedTestEditor />} />
               
               {/* Added TestPublishPage */}
               <Route path="/test/:id/publish" element={<TestPublishPage />} />

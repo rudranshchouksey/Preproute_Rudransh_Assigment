@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useForm } from 'react-hook-form';
 import type { QuestionDraft } from './types';
 import { ChapterInfoCard } from './components/ChapterInfoCard';
@@ -16,15 +16,19 @@ interface QuestionFormProps {
   numQuestions?: number;
 }
 
-export const QuestionForm: React.FC<QuestionFormProps> = ({ 
+export interface QuestionFormRef {
+  getCurrentData: () => QuestionDraft;
+}
+
+export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({ 
   initialData, 
   onSave, 
   onClear,
   questionNumber,
   testName = 'Untitled Test',
   numQuestions = 10
-}) => {
-  const { register, handleSubmit, reset, watch, formState: { errors } } = useForm<QuestionDraft>({
+}, ref) => {
+  const { register, handleSubmit, reset, watch, getValues, formState: { errors } } = useForm<QuestionDraft>({
     defaultValues: initialData || {
       stem: '',
       options: [
@@ -43,6 +47,10 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   });
 
   const correctOptionId = watch('correctOptionId');
+
+  useImperativeHandle(ref, () => ({
+    getCurrentData: () => getValues()
+  }));
 
   useEffect(() => {
     if (initialData) {
@@ -125,4 +133,4 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       
     </form>
   );
-};
+});
