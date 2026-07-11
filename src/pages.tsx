@@ -2,11 +2,12 @@ import React from 'react';
 import { Card } from './components/ui/Card';
 import { PageHeader } from './components/Layout/PageHeader';
 
+import { Navigate } from 'react-router-dom';
+
 // Protected Route Wrapper
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  // const token = localStorage.getItem('token');
-  // For development, you might want to uncomment this if auth is fully connected
-  // if (!token) return <Navigate to="/login" replace />;
+  const token = localStorage.getItem('token');
+  if (!token) return <Navigate to="/login" replace />;
   return <>{children}</>;
 };
 

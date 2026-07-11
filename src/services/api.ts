@@ -26,9 +26,8 @@ api.interceptors.response.use(
   (error) => {
     // Handle global errors here
     if (error.response?.status === 401) {
-      // e.g. logout user
       localStorage.removeItem('token');
-      // window.location.href = '/login';
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
