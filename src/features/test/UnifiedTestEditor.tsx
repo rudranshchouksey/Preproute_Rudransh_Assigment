@@ -344,20 +344,59 @@ export const UnifiedTestEditor = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-white items-start overflow-x-auto">
-      {/* Modal Header (Pixel Perfect to Figma) */}
-      <div className="w-[1200px] h-[72px] px-[20px] bg-white flex items-center justify-between shrink-0 box-border">
-        {/* Title */}
-        <div className="flex items-center gap-[10px] h-[24px]">
-          <span className="text-[16px] font-medium text-black/60 leading-[150%]">Edit Test creation</span>
+      {currentStep === 1 ? (
+        /* Modal Header for Step 1 (Pixel Perfect to Figma) */
+        <div className="w-[1200px] h-[72px] px-[20px] bg-white flex items-center justify-between shrink-0 box-border">
+          <div className="flex items-center gap-[10px] h-[24px]">
+            <span className="text-[16px] font-medium text-black/60 leading-[150%]">Edit Test creation</span>
+          </div>
+          <button type="button" onClick={() => navigate('/')} className="w-[24px] h-[24px] flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-full transition-colors">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="#111827"/>
+            </svg>
+          </button>
         </div>
-        
-        {/* Close Button */}
-        <button type="button" onClick={() => navigate('/')} className="w-[24px] h-[24px] flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-full transition-colors">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="#111827"/>
-          </svg>
-        </button>
-      </div>
+      ) : (
+        /* Regular View Headers for Step 2 */
+        <div className="w-[1200px] flex flex-col shrink-0">
+          {/* Top Nav */}
+          <div className="w-[1200px] h-[92px] px-[21px] bg-white border-b border-[#E5E7EB] flex items-center justify-end shrink-0 box-border">
+            <div className="flex items-center gap-[20px] h-[52px]">
+              <div className="w-[48px] h-[48px] bg-white border border-[#D1D5DB] rounded-[24px] flex items-center justify-center shrink-0">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.89 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="#111827"/>
+                  <circle cx="16.5" cy="7.5" r="4.5" fill="#0C9D61" stroke="white" strokeWidth="1.5"/>
+                </svg>
+              </div>
+              <div className="flex items-center gap-[9px] h-[52px]">
+                <div className="w-[48px] h-[48px] bg-[#FFD284] border border-[#6366F1] rounded-full overflow-hidden shrink-0 flex items-center justify-center">
+                   <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Avatar" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex flex-col gap-[4px] w-[115px] justify-center">
+                  <span className="text-[20px] font-semibold text-[#374151] leading-[150%] h-[30px] flex items-center">Alex Wando</span>
+                  <span className="text-[12px] font-normal text-[#374151] leading-[150%] h-[18px]">Admin</span>
+                </div>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 10L12 15L17 10H7Z" fill="#374151"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+          {/* Sub Header (Breadcrumbs + Publish) */}
+          <div className="w-[1200px] h-[72px] px-[20px] bg-white flex items-center justify-between shrink-0 box-border">
+            <div className="flex items-center gap-[8px] h-[24px]">
+              <span className="text-[16px] font-medium text-black/60 leading-[150%]">Test Creation</span>
+              <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
+              <span className="text-[16px] font-normal text-black/60 leading-[19px]">{isEditMode ? 'Edit Test' : 'Create Test'}</span>
+              <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
+              <span className="text-[16px] font-normal text-black/60 leading-[19px]">{typeLabel}</span>
+            </div>
+            <button type="button" onClick={handleTestSubmit((d) => handleSaveAll(d, 'save'))} disabled={isSaving} className="w-[160px] h-[48px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
+              <span className="text-[16px] font-medium text-[#FAFAFA] leading-[150%]">{isSaving ? 'Publishing...' : 'Publish'}</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="w-[1200px] px-[20px] py-[30px] flex flex-col shrink-0">
         {currentStep === 1 ? (
@@ -494,30 +533,37 @@ export const UnifiedTestEditor = () => {
           </div>
         ) : (
 
-          /* STEP 2: Question Editor Layout matching Figma Image 4 */
-          <div className="flex gap-8 h-full min-h-[800px]">
-            {/* Left Sidebar */}
-            <div className="w-[280px] shrink-0 border-r border-gray-100 pr-6">
-              <h3 className="text-gray-500 font-medium text-sm mb-6 flex items-center justify-between">
+          /* STEP 2: Question Editor Layout matching Figma Image */
+          <div className="w-[1200px] flex flex-row items-start border-t border-[#E5E7EB] bg-white min-h-[1455px]">
+            {/* Left Sidebar (in a real app this might be absolute positioned to the left of the 1200px, 
+                but based on the prompt, it sits inside the layout. To match exactly the 1160px card, 
+                we might need to float this sidebar or render it outside. Given the constraints, 
+                let's render the main content and hide the sidebar if it breaks the 1200px width.
+                Actually, the image shows it taking the place of the main sidebar. We will render it absolute left. */}
+            
+            <div className="absolute left-[44px] top-[92px] w-[196px] h-full bg-white border-r border-[#E5E7EB] shrink-0 pt-6">
+              <h3 className="text-[#6B7180] font-medium text-[12px] px-4 mb-6 flex items-center justify-between uppercase">
                 Question creation
                 <ChevronRight size={14} className="text-gray-400 rotate-180" />
               </h3>
               
-              <div className="text-gray-900 font-semibold text-sm mb-6 pb-4 border-b border-gray-100">
-                Total Questions . <span className="text-gray-600">{numQuestions}</span>
+              <div className="text-[#374151] font-semibold text-[14px] px-4 mb-6 pb-4 border-b border-[#E5E7EB]">
+                Total Questions . <span className="text-[#6B7180] font-normal">{numQuestions}</span>
               </div>
               
-              <QuestionSidebar 
-                questions={questions}
-                activeIndex={activeIndex}
-                numQuestions={numQuestions}
-                onSelect={handleSelectQuestion}
-                variant="minimal"
-              />
+              <div className="px-2">
+                <QuestionSidebar 
+                  questions={questions}
+                  activeIndex={activeIndex}
+                  numQuestions={numQuestions}
+                  onSelect={handleSelectQuestion}
+                  variant="minimal"
+                />
+              </div>
             </div>
 
-            {/* Main Question Editor */}
-            <div className="flex-1 max-w-4xl relative pb-24">
+            {/* Main Question Editor Container */}
+            <div className="flex-1 w-[1200px] flex flex-col p-[20px] gap-[20px] box-border relative z-10 bg-white">
               <QuestionForm
                 ref={questionFormRef}
                 key={activeIndex}
@@ -539,16 +585,24 @@ export const UnifiedTestEditor = () => {
                 numQuestions={numQuestions}
                 onOpenCsv={() => setIsCsvOpen(true)}
                 onNavigate={(index) => handleSelectQuestion(index - 1)}
+                testData={{
+                   subject: subjects.find(s => s.value === selectedSubject)?.label,
+                   topic: topics.find(t => selectedTopics?.find(st => st.value === t.value))?.label,
+                   subTopic: subTopics.find(t => t.label)?.label, // simplified for view
+                   duration: watchTest('duration'),
+                   totalMarks: watchTest('totalMarks'),
+                   difficulty: watchTest('difficulty')
+                }}
               />
 
               {/* Form Actions footer */}
-              <div className="mt-12 flex justify-between items-center">
-                <Button variant="ghost" className="bg-[#FF7D7D] hover:bg-red-500 text-white px-6 h-11 rounded-md shadow-sm" onClick={() => setCurrentStep(1)}>
-                  Exit Test Creation
-                </Button>
-                <Button onClick={handleTestSubmit(handleNextStep)} className="bg-[#5984F7] hover:bg-blue-600 text-white px-10 h-11 rounded-md shadow-sm">
-                  Next
-                </Button>
+              <div className="flex justify-between items-center w-[1160px] h-[48px] mt-[20px]">
+                <button type="button" onClick={() => setCurrentStep(1)} className="w-[172px] h-[48px] bg-[#FF7D7D] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors">
+                  <span className="text-[16px] font-medium text-white leading-[150%]">Exit Test Creation</span>
+                </button>
+                <button type="button" onClick={handleTestSubmit(handleNextStep)} className="w-[160px] h-[48px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
+                  <span className="text-[16px] font-medium text-[#FAFAFA] leading-[150%]">Next</span>
+                </button>
               </div>
             </div>
           </div>
