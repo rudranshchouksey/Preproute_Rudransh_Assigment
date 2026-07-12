@@ -1,16 +1,18 @@
 import { useEffect, forwardRef, useImperativeHandle } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import type { QuestionDraft } from './types';
 import { ChapterInfoCard } from './components/ChapterInfoCard';
 import { RichTextEditor } from './components/RichTextEditor';
 import { OptionCard } from './components/OptionCard';
 import { PropertiesSidebar } from './components/PropertiesSidebar';
 import { Button } from '../../components/ui/Button';
+import { Copy } from 'lucide-react';
 
 interface QuestionFormProps {
   initialData: QuestionDraft | null;
   onSave: (data: QuestionDraft) => void;
   onClear: () => void;
+  onDuplicate?: () => void;
   questionNumber: number;
   testName?: string;
   numQuestions?: number;
@@ -24,11 +26,12 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
   initialData, 
   onSave, 
   onClear,
+  onDuplicate,
   questionNumber,
   testName = 'Untitled Test',
   numQuestions = 10
 }, ref) => {
-  const { register, handleSubmit, reset, watch, getValues, formState: { errors } } = useForm<QuestionDraft>({
+  const { register, handleSubmit, reset, watch, getValues, setValue, control, formState: { errors } } = useForm<QuestionDraft>({
     defaultValues: initialData || {
       stem: '',
       options: [
@@ -84,14 +87,34 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
 
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-bold text-gray-900">Question {questionNumber} Editor</h2>
+            {onDuplicate && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                size="sm"
+                onClick={onDuplicate}
+                className="text-brand hover:text-brand-dark"
+              >
+                <Copy size={14} className="mr-1.5" />
+                Duplicate
+              </Button>
+            )}
           </div>
 
           <div className="space-y-6">
-            <RichTextEditor
-              label="Question Text *"
-              error={errors.stem?.message}
-              {...register('stem', { required: 'Question text is required' })}
-              placeholder="Enter the question here..."
+            <Controller
+              name="stem"
+              control={control}
+              rules={{ required: 'Question text is required' }}
+              render={({ field }) => (
+                <RichTextEditor
+                  label="Question Text *"
+                  error={errors.stem?.message}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Enter the question here..."
+                />
+              )}
             />
 
             <div className="mt-8">
@@ -113,10 +136,15 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
               <Button 
                 variant="ghost"
                 type="button" 
-                onClick={() => { onClear(); reset(); }}
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this question? This cannot be undone.')) {
+                    onClear();
+                    reset();
+                  }
+                }}
                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
               >
-                Clear Edits
+                Delete Question
               </Button>
               <Button type="submit">
                 Save & Continue
@@ -128,7 +156,7 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
 
       {/* Right Properties Sidebar */}
       <div className="w-full xl:w-80 border-t xl:border-t-0 xl:border-l border-gray-200 bg-gray-50/50 shrink-0">
-        <PropertiesSidebar register={register} />
+        <PropertiesSidebar register={register} control={control} setValue={setValue} />
       </div>
       
     </form>

@@ -1,11 +1,15 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Plus, AlertCircle, RefreshCw } from 'lucide-react';
+import { Search, Plus, AlertCircle, RefreshCw, Filter } from 'lucide-react';
 import { TestTable, type TestData } from './TestTable';
 import api from '../../services/api';
 import { PageHeader } from '../../components/Layout/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { DashboardSkeleton } from './DashboardSkeleton';
+import toast from 'react-hot-toast';
+
+type SortField = 'name' | 'subject' | 'status' | 'creationDate';
+type SortDirection = 'asc' | 'desc';
 
 export const Dashboard = () => {
   const [tests, setTests] = useState<TestData[]>([]);
@@ -14,6 +18,9 @@ export const Dashboard = () => {
   
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortField, setSortField] = useState<SortField>('creationDate');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   
   const [page, setPage] = useState(1);
   const limit = 10;
@@ -34,8 +41,6 @@ export const Dashboard = () => {
       setIsLoading(true);
       setError(null);
       
-      // Attempt fetching with pagination params. 
-      // If backend ignores them, it returns all data and we paginate client-side.
       const response = await api.get('/tests', {
         params: { page, limit, search: debouncedSearch }
       });
@@ -60,17 +65,60 @@ export const Dashboard = () => {
     try {
       await api.delete(`/tests/${id}`);
       setTests(tests.filter(t => t.id !== id && (t as any)._id !== id));
+      toast.success('Test deleted successfully.');
     } catch (error) {
       console.error('Failed to delete test', error);
-      alert('Failed to delete test');
+      toast.error('Failed to delete test.');
     }
   };
 
-  // Client-side pagination and filtering (handles cases where backend returns all items)
-  const { paginatedTests, totalPages } = useMemo(() => {
+  const handleDuplicate = async (id: string) => {
+    try {
+      const testToDuplicate = tests.find(t => (t.id === id || (t as any)._id === id));
+      if (!testToDuplicate) return;
+
+      const payload = {
+        name: `${testToDuplicate.name} (Copy)`,
+        subject: testToDuplicate.subject,
+        status: 'draft',
+        type: 'mock',
+      };
+
+      const res = await api.post('/tests', payload);
+      const newTest = res.data.data || res.data;
+      
+      if (newTest) {
+        setTests([{ 
+          id: newTest.id || newTest._id,
+          name: payload.name,
+          subject: testToDuplicate.subject,
+          status: 'draft',
+          creationDate: new Date().toISOString(),
+          questionCount: 0,
+          updatedDate: new Date().toISOString(),
+        }, ...tests]);
+        toast.success('Test duplicated successfully!');
+      }
+    } catch (error) {
+      console.error('Failed to duplicate test', error);
+      toast.error('Failed to duplicate test.');
+    }
+  };
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  // Client-side pagination, filtering, and sorting
+  const { paginatedTests, totalPages, totalFiltered } = useMemo(() => {
     let filtered = tests;
     
-    // If backend didn't filter, we filter client-side
+    // Search filter
     if (debouncedSearch) {
       filtered = filtered.filter(t => 
         t.name.toLowerCase().includes(debouncedSearch.toLowerCase()) || 
@@ -78,18 +126,41 @@ export const Dashboard = () => {
       );
     }
 
+    // Status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(t => (t.status || 'draft').toLowerCase() === statusFilter);
+    }
+
+    // Sort
+    filtered = [...filtered].sort((a, b) => {
+      let comparison = 0;
+      switch (sortField) {
+        case 'name':
+          comparison = (a.name || '').localeCompare(b.name || '');
+          break;
+        case 'subject':
+          comparison = (a.subject || '').localeCompare(b.subject || '');
+          break;
+        case 'status':
+          comparison = (a.status || '').localeCompare(b.status || '');
+          break;
+        case 'creationDate':
+          comparison = new Date(a.creationDate || 0).getTime() - new Date(b.creationDate || 0).getTime();
+          break;
+      }
+      return sortDirection === 'asc' ? comparison : -comparison;
+    });
+
     const totalPagesCalc = Math.max(1, Math.ceil(filtered.length / limit));
     
-    // If backend didn't paginate, we paginate client-side
-    // We can detect this if tests.length > limit
     let paginated = filtered;
     if (filtered.length > limit) {
       const start = (page - 1) * limit;
       paginated = filtered.slice(start, start + limit);
     }
 
-    return { paginatedTests: paginated, totalPages: totalPagesCalc };
-  }, [tests, debouncedSearch, page, limit]);
+    return { paginatedTests: paginated, totalPages: totalPagesCalc, totalFiltered: filtered.length };
+  }, [tests, debouncedSearch, statusFilter, sortField, sortDirection, page, limit]);
 
   if (isLoading && tests.length === 0) {
     return <DashboardSkeleton />;
@@ -127,6 +198,30 @@ export const Dashboard = () => {
         }
       />
 
+      {/* Filters Row */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Filter size={14} />
+          <span className="font-medium">Filter:</span>
+        </div>
+        {['all', 'draft', 'live', 'archived'].map((status) => (
+          <button
+            key={status}
+            onClick={() => { setStatusFilter(status); setPage(1); }}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-colors border ${
+              statusFilter === status 
+                ? 'bg-brand text-white border-brand' 
+                : 'bg-white text-gray-600 border-gray-200 hover:border-brand/40 hover:text-brand'
+            }`}
+          >
+            {status === 'all' ? 'All Tests' : status.charAt(0).toUpperCase() + status.slice(1)}
+          </button>
+        ))}
+        {totalFiltered !== tests.length && (
+          <span className="text-xs text-gray-400 ml-2">{totalFiltered} of {tests.length} tests</span>
+        )}
+      </div>
+
       {error ? (
         <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-xl flex flex-col items-center justify-center space-y-4">
           <AlertCircle size={32} className="text-red-500" />
@@ -137,7 +232,15 @@ export const Dashboard = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          <TestTable tests={paginatedTests} isLoading={isLoading} onDelete={handleDelete} />
+          <TestTable 
+            tests={paginatedTests} 
+            isLoading={isLoading} 
+            onDelete={handleDelete}
+            onDuplicate={handleDuplicate}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+          />
           
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-2">

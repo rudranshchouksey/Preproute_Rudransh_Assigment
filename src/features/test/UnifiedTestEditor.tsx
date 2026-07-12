@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import api from '../../services/api';
@@ -12,11 +12,12 @@ import { Button } from '../../components/ui/Button';
 import { MultiSelect } from '../../components/Form/MultiSelect';
 import { MarkingScheme } from './MarkingScheme';
 import { Skeleton } from '../../components/ui/Skeleton';
-import { AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertCircle, RefreshCw, FileSpreadsheet, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 import { QuestionForm, QuestionFormRef } from '../questions/QuestionForm';
 import { QuestionSidebar } from '../questions/components/QuestionSidebar';
+import { CsvUploadModal } from '../questions/components/CsvUploadModal';
 import type { QuestionDraft } from '../questions/types';
 
 interface Option {
@@ -39,6 +40,9 @@ export const UnifiedTestEditor = () => {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const questionFormRef = useRef<QuestionFormRef>(null);
 
+  // CSV Upload State
+  const [isCsvOpen, setIsCsvOpen] = useState(false);
+
   // Data Loading State
   const [subjects, setSubjects] = useState<Option[]>([]);
   const [topics, setTopics] = useState<Option[]>([]);
@@ -46,6 +50,10 @@ export const UnifiedTestEditor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Auto-save state
+  const [lastAutoSaved, setLastAutoSaved] = useState<string | null>(null);
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchInitialData = async () => {
     setIsLoading(true);
@@ -134,6 +142,48 @@ export const UnifiedTestEditor = () => {
     fetchSubTopics();
   }, [selectedTopics, setTestValue]);
 
+  // Auto-save (edit mode only, every 30s of inactivity)
+  const triggerAutoSave = useCallback(() => {
+    if (!isEditMode || isSaving) return;
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        let currentQuestions = [...questions];
+        if (questionFormRef.current) {
+          currentQuestions[activeIndex] = questionFormRef.current.getCurrentData();
+        }
+        
+        const payload = {
+          status: 'draft',
+        };
+        
+        await api.put(`/tests/${id}`, payload);
+        
+        if (currentQuestions.some(q => q !== null)) {
+          await api.post('/questions/bulk', {
+            testId: id,
+            questions: currentQuestions
+          });
+        }
+        
+        const now = new Date();
+        setLastAutoSaved(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      } catch (err) {
+        // Silent fail for auto-save
+        console.warn('Auto-save failed', err);
+      }
+    }, 30000);
+  }, [isEditMode, isSaving, questions, activeIndex, id]);
+
+  // Trigger auto-save timer on question changes
+  useEffect(() => {
+    if (isEditMode) triggerAutoSave();
+    return () => {
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    };
+  }, [questions, triggerAutoSave, isEditMode]);
+
   // Handle saving the current question to local state before switching
   const handleSelectQuestion = (index: number) => {
     if (questionFormRef.current) {
@@ -143,6 +193,57 @@ export const UnifiedTestEditor = () => {
       setQuestions(updated);
     }
     setActiveIndex(index);
+  };
+
+  // Handle question duplication
+  const handleDuplicateQuestion = () => {
+    if (questionFormRef.current) {
+      const currentData = questionFormRef.current.getCurrentData();
+      if (!currentData || !currentData.stem) {
+        toast.error('Save the current question before duplicating.');
+        return;
+      }
+      // Find next empty slot
+      const nextEmpty = questions.findIndex((q, idx) => idx > activeIndex && q === null);
+      if (nextEmpty !== -1) {
+        const updated = [...questions];
+        updated[activeIndex] = currentData; // save current first
+        updated[nextEmpty] = { ...currentData }; // clone to next empty
+        setQuestions(updated);
+        setActiveIndex(nextEmpty);
+        toast.success(`Question duplicated to slot ${nextEmpty + 1}`);
+      } else {
+        toast.error('No empty question slots available.');
+      }
+    }
+  };
+
+  // Handle CSV import
+  const handleCsvImport = (importedQuestions: QuestionDraft[]) => {
+    // Sync current question first
+    let currentQuestions = [...questions];
+    if (questionFormRef.current) {
+      currentQuestions[activeIndex] = questionFormRef.current.getCurrentData();
+    }
+
+    // Fill imported questions into empty slots
+    let imported = 0;
+    for (const q of importedQuestions) {
+      const emptyIdx = currentQuestions.findIndex(existing => existing === null);
+      if (emptyIdx !== -1) {
+        currentQuestions[emptyIdx] = q;
+        imported++;
+      } else {
+        break;
+      }
+    }
+
+    setQuestions(currentQuestions);
+    toast.success(`Successfully imported ${imported} questions!`);
+
+    if (imported < importedQuestions.length) {
+      toast(`${importedQuestions.length - imported} questions skipped (no empty slots).`, { icon: '⚠️' });
+    }
   };
 
   const handleSaveAll = async (testData: Record<string, any>, mode: 'draft' | 'save' = 'save') => {
@@ -310,13 +411,21 @@ export const UnifiedTestEditor = () => {
 
         <div className="flex flex-col md:flex-row gap-6 min-h-[600px] scroll-mt-24" id="question-editor">
           <div className="w-full md:w-72 shrink-0">
-            <div className="sticky top-24">
+            <div className="sticky top-24 space-y-3">
               <QuestionSidebar 
                 questions={questions}
                 activeIndex={activeIndex}
                 numQuestions={numQuestions}
                 onSelect={handleSelectQuestion}
               />
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setIsCsvOpen(true)}
+              >
+                <FileSpreadsheet size={16} className="mr-2" />
+                Import CSV
+              </Button>
             </div>
           </div>
           <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100">
@@ -336,6 +445,7 @@ export const UnifiedTestEditor = () => {
                 updated[activeIndex] = null as any;
                 setQuestions(updated);
               }}
+              onDuplicate={handleDuplicateQuestion}
               testName={testName}
               numQuestions={numQuestions}
             />
@@ -343,11 +453,26 @@ export const UnifiedTestEditor = () => {
         </div>
       </div>
 
+      {/* CSV Upload Modal */}
+      <CsvUploadModal
+        isOpen={isCsvOpen}
+        onClose={() => setIsCsvOpen(false)}
+        onImport={handleCsvImport}
+        existingCount={questions.filter(q => q !== null).length}
+        maxQuestions={numQuestions}
+      />
+
       {/* Global Actions Sticky Footer */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 flex justify-end gap-4 shadow-[0_-4px_10px_-1px_rgba(0,0,0,0.05)] z-50 px-6 lg:px-12">
         <Button variant="ghost" onClick={() => navigate('/')} disabled={isSaving} className="mr-auto text-gray-500 hover:text-gray-700">
           Cancel
         </Button>
+        {lastAutoSaved && (
+          <span className="flex items-center text-xs text-gray-400 font-medium mr-2">
+            <Save size={12} className="mr-1" />
+            Auto-saved at {lastAutoSaved}
+          </span>
+        )}
         <Button variant="outline" onClick={handleTestSubmit((d) => handleSaveAll(d, 'draft'))} isLoading={isSaving && watchTest('status') === 'draft'}>
           Save Draft
         </Button>

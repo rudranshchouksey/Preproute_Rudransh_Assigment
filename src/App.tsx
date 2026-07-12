@@ -5,10 +5,8 @@ import { Dashboard } from './features/dashboard/Dashboard';
 import { MainLayout } from './components/Layout/MainLayout';
 import { UnifiedTestEditor } from './features/test/UnifiedTestEditor';
 import { TestPublishPage } from './features/publish/TestPublishPage';
-import {
-  TestTracking,
-  ProtectedRoute
-} from './pages';
+import { TestTrackingPage } from './features/tracking/TestTrackingPage';
+import { ProtectedRoute } from './pages';
 
 function App() {
   return (
@@ -33,10 +31,10 @@ function App() {
               <Route path="/test/edit/:id" element={<UnifiedTestEditor />} />
               <Route path="/test/:id/questions" element={<UnifiedTestEditor />} />
               
-              {/* Added TestPublishPage */}
+              {/* TestPublishPage */}
               <Route path="/test/:id/publish" element={<TestPublishPage />} />
               
-              <Route path="/test/tracking" element={<TestTracking />} />
+              <Route path="/test/tracking" element={<TestTrackingPage />} />
             </Route>
 
             {/* Catch-all redirect */}

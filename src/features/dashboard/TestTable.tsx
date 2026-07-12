@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Edit3, Eye, Trash2, Loader2 } from 'lucide-react';
+import { Edit3, Eye, Trash2, Loader2, Copy, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Card } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -10,15 +10,31 @@ export interface TestData {
   subject: string;
   status: 'draft' | 'live' | 'archived';
   creationDate: string;
+  questionCount?: number;
+  updatedDate?: string;
 }
+
+type SortField = 'name' | 'subject' | 'status' | 'creationDate';
+type SortDirection = 'asc' | 'desc';
 
 interface TestTableProps {
   tests: TestData[];
   isLoading: boolean;
   onDelete?: (id: string) => void;
+  onDuplicate?: (id: string) => void;
+  sortField?: SortField;
+  sortDirection?: SortDirection;
+  onSort?: (field: SortField) => void;
 }
 
-export const TestTable = ({ tests, isLoading, onDelete }: TestTableProps) => {
+const SortIcon = ({ field, currentField, direction }: { field: SortField; currentField?: SortField; direction?: SortDirection }) => {
+  if (field !== currentField) return <ArrowUpDown size={12} className="ml-1 text-gray-300" />;
+  return direction === 'asc' 
+    ? <ArrowUp size={12} className="ml-1 text-brand" /> 
+    : <ArrowDown size={12} className="ml-1 text-brand" />;
+};
+
+export const TestTable = ({ tests, isLoading, onDelete, onDuplicate, sortField, sortDirection, onSort }: TestTableProps) => {
   if (isLoading) {
     return (
       <Card className="w-full p-24 flex justify-center items-center">
@@ -35,24 +51,45 @@ export const TestTable = ({ tests, isLoading, onDelete }: TestTableProps) => {
     );
   }
 
+  const headerClass = "px-6 py-4 text-sm font-semibold text-gray-700 cursor-pointer hover:text-gray-900 transition-colors select-none";
+
   return (
     <Card className="!p-0 border-gray-200">
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50/80 border-b border-gray-200">
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">Test Name</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">Subject</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">Status</th>
-              <th className="px-6 py-4 text-sm font-semibold text-gray-700">Creation Date</th>
+              <th className={headerClass} onClick={() => onSort?.('name')}>
+                <span className="flex items-center">
+                  Test Name <SortIcon field="name" currentField={sortField} direction={sortDirection} />
+                </span>
+              </th>
+              <th className={headerClass} onClick={() => onSort?.('subject')}>
+                <span className="flex items-center">
+                  Subject <SortIcon field="subject" currentField={sortField} direction={sortDirection} />
+                </span>
+              </th>
+              <th className={headerClass} onClick={() => onSort?.('status')}>
+                <span className="flex items-center">
+                  Status <SortIcon field="status" currentField={sortField} direction={sortDirection} />
+                </span>
+              </th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-700">Questions</th>
+              <th className={headerClass} onClick={() => onSort?.('creationDate')}>
+                <span className="flex items-center">
+                  Created <SortIcon field="creationDate" currentField={sortField} direction={sortDirection} />
+                </span>
+              </th>
+              <th className="px-6 py-4 text-sm font-semibold text-gray-700">Updated</th>
               <th className="px-6 py-4 text-sm font-semibold text-gray-700 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {tests.map((test) => {
               const status = (test.status || 'draft').toLowerCase();
+              const testId = test.id || (test as any)._id;
               return (
-                <tr key={test.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={testId} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900">{test.name}</td>
                   <td className="px-6 py-4 text-gray-600 text-sm">{test.subject}</td>
                   <td className="px-6 py-4">
@@ -60,15 +97,23 @@ export const TestTable = ({ tests, isLoading, onDelete }: TestTableProps) => {
                       {status.charAt(0).toUpperCase() + status.slice(1)}
                     </Badge>
                   </td>
-                  <td className="px-6 py-4 text-gray-500 text-sm font-medium">{new Date(test.creationDate).toLocaleDateString()}</td>
+                  <td className="px-6 py-4 text-gray-500 text-sm font-medium">
+                    {test.questionCount !== undefined ? test.questionCount : '—'}
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 text-sm font-medium">
+                    {test.creationDate ? new Date(test.creationDate).toLocaleDateString() : '—'}
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 text-sm font-medium">
+                    {test.updatedDate ? new Date(test.updatedDate).toLocaleDateString() : '—'}
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end space-x-1">
-                      <Link to={`/test/${test.id || (test as any)._id}/publish`}>
+                      <Link to={`/test/${testId}/publish`}>
                         <Button variant="ghost" size="icon" className="text-gray-500 hover:text-brand" title="View">
                           <Eye size={18} />
                         </Button>
                       </Link>
-                      <Link to={`/test/edit/${test.id || (test as any)._id}`}>
+                      <Link to={`/test/edit/${testId}`}>
                         <Button variant="ghost" size="icon" className="text-gray-500 hover:text-amber-500" title="Edit">
                           <Edit3 size={18} />
                         </Button>
@@ -76,7 +121,16 @@ export const TestTable = ({ tests, isLoading, onDelete }: TestTableProps) => {
                       <Button 
                         variant="ghost" 
                         size="icon" 
-                        onClick={() => onDelete?.(test.id || (test as any)._id)} 
+                        onClick={() => onDuplicate?.(testId)} 
+                        className="text-gray-500 hover:text-brand" 
+                        title="Duplicate"
+                      >
+                        <Copy size={18} />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => onDelete?.(testId)} 
                         className="text-gray-500 hover:text-red-500" 
                         title="Delete"
                       >
