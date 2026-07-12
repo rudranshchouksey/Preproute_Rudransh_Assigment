@@ -120,7 +120,9 @@ export const UnifiedTestEditor = () => {
         const res = await api.get(`/topics/subject/${selectedSubject}`).catch(() => ({ data: [] }));
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
         setTopics(data.map((t: any) => ({ value: t.id || t._id, label: t.name })));
-      } catch (error) {}
+      } catch {
+        // Fallback or ignore
+      }
     };
     fetchTopics();
   }, [selectedSubject, setTestValue]);
@@ -137,7 +139,9 @@ export const UnifiedTestEditor = () => {
         const res = await api.post('/sub-topics/multi-topics', { topicIds }).catch(() => ({ data: [] }));
         const data = Array.isArray(res.data) ? res.data : res.data.data || [];
         setSubTopics(data.map((st: any) => ({ value: st.id || st._id, label: st.name })));
-      } catch (error) {}
+      } catch {
+        // Fallback or ignore
+      }
     };
     fetchSubTopics();
   }, [selectedTopics, setTestValue]);

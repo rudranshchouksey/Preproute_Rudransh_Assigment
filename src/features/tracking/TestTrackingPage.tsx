@@ -62,7 +62,7 @@ export const TestTrackingPage = () => {
       await api.delete(`/tests/${id}`);
       setTests(tests.filter(t => t.id !== id));
       toast.success('Test deleted.');
-    } catch (err) {
+    } catch {
       toast.error('Failed to delete test.');
     }
   };
