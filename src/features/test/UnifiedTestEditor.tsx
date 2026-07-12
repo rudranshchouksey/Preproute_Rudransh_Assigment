@@ -163,10 +163,23 @@ export const UnifiedTestEditor = () => {
 
         await api.put(`/tests/${id}`, payload);
 
-        if (currentQuestions.some(q => q !== null)) {
+        const validQuestions = currentQuestions
+          .filter(q => q !== null && q.stem && q.stem.trim() !== '')
+          .map(q => {
+             const clean = { ...q } as any;
+             if (!clean.topicId) delete clean.topicId;
+             if (!clean.subTopicId) delete clean.subTopicId;
+             if (!clean.difficulty) delete clean.difficulty;
+             if (clean.options) {
+               clean.options = clean.options.filter((o: any) => o.text && o.text.trim() !== '');
+             }
+             return clean;
+          });
+          
+        if (validQuestions.length > 0) {
           await api.post('/questions/bulk', {
             testId: id,
-            questions: currentQuestions
+            questions: validQuestions
           });
         }
 
@@ -296,10 +309,23 @@ export const UnifiedTestEditor = () => {
 
       if (!testId) throw new Error("Failed to extract Test ID");
 
-      if (currentQuestions.some(q => q !== null)) {
+      const validQuestions = currentQuestions
+        .filter(q => q !== null && q.stem && q.stem.trim() !== '')
+        .map(q => {
+           const clean = { ...q } as any;
+           if (!clean.topicId) delete clean.topicId;
+           if (!clean.subTopicId) delete clean.subTopicId;
+           if (!clean.difficulty) delete clean.difficulty;
+           if (clean.options) {
+             clean.options = clean.options.filter((o: any) => o.text && o.text.trim() !== '');
+           }
+           return clean;
+        });
+        
+      if (validQuestions.length > 0) {
         await api.post('/questions/bulk', {
           testId: testId,
-          questions: currentQuestions
+          questions: validQuestions
         });
       }
 

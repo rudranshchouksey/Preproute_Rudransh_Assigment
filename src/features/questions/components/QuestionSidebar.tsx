@@ -23,7 +23,7 @@ export const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   if (variant === 'minimal') {
     return (
       <div className="w-full flex flex-col h-[calc(100vh-300px)] overflow-y-auto no-scrollbar pr-2">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-[10px]">
           {questions.map((q, idx) => {
             const isActive = activeIndex === idx;
             const isCompleted = q !== null;
@@ -34,16 +34,17 @@ export const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                 type="button"
                 onClick={() => onSelect(idx)}
                 className={cn(
-                  "py-2 px-3 rounded-lg text-sm font-semibold flex items-center justify-between transition-all border",
+                  "h-[60px] rounded-[8px] flex flex-col items-center justify-center transition-all border relative px-2",
                   isActive
                     ? "bg-[#5984F7] text-white border-[#5984F7]"
-                    : "bg-white text-gray-500 border-gray-200 hover:border-[#5984F7]"
+                    : "bg-white text-[#374151] border-[#E5E7EB] hover:border-[#5984F7]"
                 )}
               >
-                <span>Question {idx + 1}</span>
+                <span className="text-[12px] font-medium leading-[150%]">Question</span>
+                <span className="text-[12px] font-medium leading-[150%]">{idx + 1}</span>
                 {isCompleted && !isActive && (
-                  <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
-                     <CheckCircle2 size={12} className="text-white" />
+                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-[16px] h-[16px] rounded-full bg-[#10B981] border-2 border-white flex items-center justify-center">
+                     <CheckCircle2 size={10} className="text-white" />
                   </div>
                 )}
               </button>

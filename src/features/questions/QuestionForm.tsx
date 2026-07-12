@@ -94,61 +94,61 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
     <form onSubmit={handleSubmit(onSave)} className="flex h-full w-full flex-col">
       <div className="flex-1 w-full no-scrollbar pb-12">
         {/* Test Detail Card (Pixel Perfect to Figma) */}
-        <div className="w-full h-[230px] bg-white border border-[#E5E7EB] rounded-[8px] flex items-start justify-between p-[20px] box-border shrink-0 mb-[30px] overflow-hidden relative">
-          <div className="w-[215px] h-[190px] flex flex-col gap-[20px]">
+        <div className="w-full min-h-[230px] h-auto bg-white border border-[#E5E7EB] rounded-[8px] flex flex-col md:flex-row items-start justify-between p-[20px] gap-[20px] box-border shrink-0 mb-[30px] relative">
+          <div className="flex-1 flex flex-col gap-[20px]">
             {/* Top row with Chapter Wise label */}
-            <div className="flex items-end gap-[5px] h-[24px]">
-              <div className="w-[110px] h-[24px] flex items-center justify-center rounded-[12px] px-[10px] py-[5px] box-border" style={{ background: 'linear-gradient(104.9deg, #07013C 0%, #000A3A 102.39%)', border: '0.5px solid #F8FAFF' }}>
+            <div className="flex items-end gap-[5px]">
+              <div className="w-auto inline-flex items-center justify-center rounded-[12px] px-[10px] py-[5px] box-border" style={{ background: 'linear-gradient(104.9deg, #07013C 0%, #000A3A 102.39%)', border: '0.5px solid #F8FAFF' }}>
                 <span className="text-[14px] font-normal text-[#F8FAFF] leading-[150%]">Chapter Wise</span>
               </div>
             </div>
             
             {/* Chapter Title & Difficulty */}
-            <div className="flex items-end gap-[10px] h-[24px]">
-              <div className="flex items-center gap-[20px] h-[24px]">
-                <div className="flex items-end gap-[5px] h-[24px]">
-                  <div className="w-[24px] h-[24px] rounded-full overflow-hidden flex items-center justify-center bg-[#D9D9D9]">
-                     <div className="w-[16px] h-[16px] rounded-full" style={{ background: 'linear-gradient(90deg, #6C5ABD 15.25%, #CE8302 99.14%)' }}></div>
-                  </div>
-                  <span className="text-[16px] font-bold text-[#000000] leading-[150%]">{testName}</span>
+            <div className="flex items-center gap-[20px] flex-wrap">
+              <div className="flex items-center gap-[5px]">
+                <div className="w-[24px] h-[24px] rounded-full overflow-hidden flex items-center justify-center bg-[#D9D9D9]">
+                   <div className="w-[16px] h-[16px] rounded-full" style={{ background: 'linear-gradient(90deg, #6C5ABD 15.25%, #CE8302 99.14%)' }}></div>
                 </div>
-                <div className="h-[24px] bg-[#2AB7A9] rounded-[8px] flex items-center justify-center px-[10px] gap-[8px]">
-                   <span className="text-[14px] font-normal text-[#FEFEFF] leading-[150%] capitalize">{testData?.difficulty || 'Easy'}</span>
-                </div>
+                <span className="text-[16px] font-bold text-[#000000] leading-[150%] whitespace-nowrap">{testName}</span>
+              </div>
+              <div className="bg-[#2AB7A9] rounded-[8px] flex items-center justify-center px-[10px] py-[2px] gap-[8px]">
+                 <span className="text-[14px] font-normal text-[#FEFEFF] leading-[150%] capitalize">{testData?.difficulty || 'Easy'}</span>
               </div>
             </div>
 
             {/* Subject, Topic, Sub Topic Rows */}
-            <div className="flex flex-col gap-[15px] h-[102px]">
-              <div className="flex items-center gap-[5px] h-[24px]">
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[100px]">Subject</span>
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[4px]">:</span>
+            <div className="flex flex-col gap-[15px]">
+              <div className="flex items-center gap-[5px]">
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[80px]">Subject</span>
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[10px]">:</span>
                 <span className="text-[16px] font-medium text-[#6B7280] leading-[150%]">{testData?.subject || 'English'}</span>
               </div>
-              <div className="flex items-center gap-[5px] h-[24px]">
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[100px]">Topic</span>
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[4px]">:</span>
-                <div className="flex gap-[5px] h-[24px]">
-                  <div className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
+              <div className="flex flex-wrap items-center gap-[5px]">
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[80px]">Topic</span>
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[10px]">:</span>
+                <div className="flex flex-wrap gap-[5px]">
+                  <div className="border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px] py-[2px]">
                     <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">{testData?.topic || 'Grammar'}</span>
                   </div>
-                  <div className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
+                  <div className="border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px] py-[2px]">
                     <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">Writing</span>
                   </div>
                 </div>
               </div>
-              <div className="flex items-center gap-[5px] h-[24px]">
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[100px]">Sub Topic</span>
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[4px]">:</span>
-                <div className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
-                  <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">{testData?.subTopic || 'Application'}</span>
+              <div className="flex flex-wrap items-center gap-[5px]">
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[80px]">Sub Topic</span>
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[10px]">:</span>
+                <div className="flex flex-wrap gap-[5px]">
+                  <div className="border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px] py-[2px]">
+                    <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">{testData?.subTopic || 'Vocabulary'}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right side stats */}
-          <div className="w-[322px] h-[190px] flex flex-col justify-between items-end">
+          <div className="w-auto flex flex-col justify-between items-end gap-[10px]">
             <button type="button" className="w-[20px] h-[20px] flex items-center justify-center text-[#7489FF] cursor-pointer hover:bg-gray-100 rounded-full transition-colors">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25ZM20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor"/>
