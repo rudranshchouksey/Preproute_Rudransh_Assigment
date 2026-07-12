@@ -91,10 +91,10 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSave)} className="flex h-full w-full flex-col items-center">
-      <div className="flex-1 w-[1160px] no-scrollbar pb-12">
+    <form onSubmit={handleSubmit(onSave)} className="flex h-full w-full flex-col">
+      <div className="flex-1 w-full no-scrollbar pb-12">
         {/* Test Detail Card (Pixel Perfect to Figma) */}
-        <div className="w-[1160px] h-[230px] bg-white border border-[#E5E7EB] rounded-[8px] flex items-start justify-between p-[20px] box-border shrink-0 mb-[30px]">
+        <div className="w-full h-[230px] bg-white border border-[#E5E7EB] rounded-[8px] flex items-start justify-between p-[20px] box-border shrink-0 mb-[30px] overflow-hidden relative">
           <div className="w-[215px] h-[190px] flex flex-col gap-[20px]">
             {/* Top row with Chapter Wise label */}
             <div className="flex items-end gap-[5px] h-[24px]">
@@ -181,7 +181,7 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
         </div>
 
         {/* Question Header & Actions */}
-        <div className="flex items-center justify-between h-[68px] bg-white rounded-[8px] mb-[20px]">
+        <div className="w-full flex items-center justify-between pb-[20px] border-b border-[#E5E7EB] mb-[20px]">
           <h2 className="text-[16px] font-medium text-[#07013C] leading-[150%]">
             Question {questionNumber}<span className="text-[#07013C] font-normal">/{numQuestions}</span>
           </h2>
@@ -292,10 +292,9 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
             </div>
 
             {/* Question settings */}
-            <div className="border-t border-gray-100 pt-8 pb-8 space-y-6">
-              <h3 className="font-semibold text-gray-900 text-sm">Question settings</h3>
-              
-              <div className="space-y-6">
+            <div className="w-full mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">Properties</h4>
+              <div className="grid grid-cols-3 gap-4 w-full">
                 <div>
                   <Label className="text-gray-600 font-semibold mb-2">Level of Difficulty</Label>
                   <Select {...register('difficulty')} className="h-12 w-full max-w-lg text-gray-500 bg-white">

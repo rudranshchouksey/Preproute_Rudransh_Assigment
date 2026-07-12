@@ -536,13 +536,8 @@ export const UnifiedTestEditor = () => {
 
           /* STEP 2: Question Editor Layout matching Figma Image */
           <div className="w-[1200px] flex flex-row items-start border-t border-[#E5E7EB] bg-white min-h-[1455px]">
-            {/* Left Sidebar (in a real app this might be absolute positioned to the left of the 1200px, 
-                but based on the prompt, it sits inside the layout. To match exactly the 1160px card, 
-                we might need to float this sidebar or render it outside. Given the constraints, 
-                let's render the main content and hide the sidebar if it breaks the 1200px width.
-                Actually, the image shows it taking the place of the main sidebar. We will render it absolute left. */}
-
-            <div className="absolute left-[44px] top-[92px] w-[196px] h-full bg-white border-r border-[#E5E7EB] shrink-0 pt-6">
+            {/* Left Sidebar */}
+            <div className="w-[196px] min-h-[1455px] bg-white border-r border-[#E5E7EB] shrink-0 pt-6">
               <h3 className="text-[#6B7180] font-medium text-[12px] px-4 mb-6 flex items-center justify-between uppercase">
                 Question creation
                 <ChevronRight size={14} className="text-gray-400 rotate-180" />
@@ -564,7 +559,7 @@ export const UnifiedTestEditor = () => {
             </div>
 
             {/* Main Question Editor Container */}
-            <div className="flex-1 w-[1200px] flex flex-col p-[20px] gap-[20px] box-border relative z-10 bg-white">
+            <div className="flex-1 w-[1004px] flex flex-col p-[20px] gap-[20px] box-border bg-white">
               <QuestionForm
                 ref={questionFormRef}
                 key={activeIndex}
@@ -597,7 +592,7 @@ export const UnifiedTestEditor = () => {
               />
 
               {/* Form Actions footer */}
-              <div className="flex justify-between items-center w-[1160px] h-[48px] mt-[20px]">
+              <div className="flex justify-between items-center w-full h-[48px] mt-[20px]">
                 <button type="button" onClick={() => setCurrentStep(1)} className="w-[172px] h-[48px] bg-[#FF7D7D] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors">
                   <span className="text-[16px] font-medium text-white leading-[150%]">Exit Test Creation</span>
                 </button>
