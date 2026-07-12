@@ -7,22 +7,22 @@ import { PageHeader } from '../../components/Layout/PageHeader';
 import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { AlertCircle, RefreshCw } from 'lucide-react';
-import type { QuestionDraft, BulkQuestionPayload } from './types';
+import type { QuestionDraft } from './types';
 import { mapApiToDraft, mapDraftToApi } from './utils';
 
 export const QuestionEditorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [testName, setTestName] = useState<string>('Loading...');
   const [testSubjectId, setTestSubjectId] = useState<string>('');
   const [numQuestions, setNumQuestions] = useState<number>(10);
-  
+
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
@@ -92,7 +92,7 @@ export const QuestionEditorPage = () => {
     const updatedQuestions = [...questions];
     updatedQuestions[activeIndex] = data;
     setQuestions(updatedQuestions);
-    
+
     if (activeIndex < numQuestions - 1) {
       setActiveIndex(activeIndex + 1);
     }
@@ -114,19 +114,19 @@ export const QuestionEditorPage = () => {
       }
       return;
     }
-    
+
     setIsSubmitting(true);
     setError('');
-    
+
     try {
       const payload: any = {
         testId: id!,
         questions: questions.map(q => mapDraftToApi(q, { subject: testSubjectId }))
       };
-      
+
       await api.post('/questions/bulk', payload);
       navigate(`/test/${id}/publish`);
-      
+
     } catch (err: any) {
       console.error("Bulk submit failed", err);
       setError(err.response?.data?.message || "Failed to save questions. Please try again.");
@@ -138,7 +138,7 @@ export const QuestionEditorPage = () => {
   if (fetchError) {
     return (
       <div className="flex flex-col h-full font-sans">
-        <PageHeader 
+        <PageHeader
           breadcrumbs={[{ label: 'Test Creation', href: '/' }, { label: 'Edit Test' }]}
           title="Edit Questions"
         />
@@ -157,7 +157,7 @@ export const QuestionEditorPage = () => {
     return (
       <div className="flex flex-col h-full font-sans">
         <div className="shrink-0 mb-6">
-          <PageHeader 
+          <PageHeader
             breadcrumbs={[{ label: 'Test Creation', href: '/' }, { label: 'Edit Test' }]}
             title="Edit Questions: Loading..."
             action={<Skeleton className="h-10 w-32 rounded-lg" />}
@@ -192,7 +192,7 @@ export const QuestionEditorPage = () => {
   return (
     <div className="flex flex-col h-full font-sans">
       <div className="shrink-0 mb-6">
-        <PageHeader 
+        <PageHeader
           breadcrumbs={[
             { label: 'Test Creation', href: '/' },
             { label: 'Edit Test', href: `/test/edit/${id}` },
@@ -217,7 +217,7 @@ export const QuestionEditorPage = () => {
       <div className="flex flex-1 overflow-hidden flex-col md:flex-row gap-6 pb-6 min-h-[600px]">
         {/* Left Sidebar */}
         <div className="w-full md:w-72 shrink-0">
-          <QuestionSidebar 
+          <QuestionSidebar
             questions={questions}
             activeIndex={activeIndex}
             numQuestions={numQuestions}
