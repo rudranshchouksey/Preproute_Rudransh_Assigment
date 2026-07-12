@@ -389,9 +389,13 @@ export const UnifiedTestEditor = () => {
 
       let testId = id;
       if (isEditMode) {
-        await api.put(`/tests/${id}`, payload);
+        console.log('✓ PUT /api/tests/:id Payload:', JSON.stringify(payload, null, 2));
+        const putRes = await api.put(`/tests/${id}`, payload);
+        console.log('✓ PUT Response:', putRes.status, putRes.data?.status);
       } else {
+        console.log('✓ POST /api/tests Payload:', JSON.stringify(payload, null, 2));
         const res = await api.post('/tests', payload);
+        console.log('✓ POST Response:', res.status, res.data?.status);
         testId = res.data.id || res.data._id || res.data.data?.id;
       }
 
@@ -432,10 +436,13 @@ export const UnifiedTestEditor = () => {
       }
         
       if (validQuestions.length > 0) {
-        await api.post('/questions/bulk', {
+        const bulkPayload = {
           testId: testId,
           questions: validQuestions
-        });
+        };
+        console.log('✓ POST /api/questions/bulk Payload:', JSON.stringify(bulkPayload, null, 2));
+        const bulkRes = await api.post('/questions/bulk', bulkPayload);
+        console.log('✓ Bulk Response:', bulkRes.status, bulkRes.data?.status);
       }
 
       if (mode === 'save') {
