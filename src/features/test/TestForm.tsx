@@ -110,8 +110,8 @@ export const TestForm = () => {
       const payload = {
         name: data.name,
         subject: data.subjectId,
-        topics: data.topicIds?.map((t: Option) => t.value) || [],
-        sub_topics: data.subTopicIds?.map((t: Option) => t.value) || [],
+        ...(data.topicIds && data.topicIds.length > 0 ? { topics: data.topicIds.map((t: Option) => t.value) } : {}),
+        ...(data.subTopicIds && data.subTopicIds.length > 0 ? { sub_topics: data.subTopicIds.map((t: Option) => t.value) } : {}),
         total_time: Number(data.duration),
         total_questions: Number(data.numQuestions),
         total_marks: Number(data.totalMarks),

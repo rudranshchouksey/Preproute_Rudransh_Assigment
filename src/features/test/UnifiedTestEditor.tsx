@@ -312,8 +312,8 @@ export const UnifiedTestEditor = () => {
       const payload = {
         name: testData.name,
         subject: testData.subjectId,
-        topics: testData.topicIds?.map((t: Option) => t.value).filter(Boolean) || [],
-        sub_topics: testData.subTopicIds?.map((t: Option) => t.value).filter(Boolean) || [],
+        ...(testData.topicIds && testData.topicIds.length > 0 ? { topics: testData.topicIds.map((t: Option) => t.value) } : {}),
+        ...(testData.subTopicIds && testData.subTopicIds.length > 0 ? { sub_topics: testData.subTopicIds.map((t: Option) => t.value) } : {}),
         total_time: Number(testData.duration),
         total_questions: Number(testData.numQuestions),
         total_marks: Number(testData.totalMarks),

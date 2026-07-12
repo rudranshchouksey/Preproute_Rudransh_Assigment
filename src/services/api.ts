@@ -55,8 +55,15 @@ api.interceptors.response.use(
            error.message = resData.message;
         } 
         // If it's an array of errors (Zod / Express Validator)
-        else if (Array.isArray(resData.errors)) {
-           error.message = resData.errors.map((e: any) => e.message || e.msg || JSON.stringify(e)).join(', ');
+        else if (Array.isArray(resData.errors) && resData.errors.length > 0) {
+           const firstError = resData.errors[0];
+           // Overwrite response data entirely with exact object requested by user
+           error.response.data = {
+             success: false,
+             field: firstError.path || firstError.param || 'unknown_field',
+             message: firstError.msg || firstError.message || JSON.stringify(firstError)
+           };
+           return Promise.reject(error);
         }
       }
     }

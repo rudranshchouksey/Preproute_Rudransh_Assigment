@@ -15,6 +15,7 @@ export const QuestionEditorPage = () => {
   const navigate = useNavigate();
   
   const [testName, setTestName] = useState<string>('Loading...');
+  const [testSubjectId, setTestSubjectId] = useState<string>('');
   const [numQuestions, setNumQuestions] = useState<number>(10);
   
   const [questions, setQuestions] = useState<QuestionDraft[]>([]);
@@ -32,6 +33,7 @@ export const QuestionEditorPage = () => {
       const res = await api.get(`/tests/${id}`);
       const data = res.data.data || res.data;
       setTestName(data.name || `Test ${id}`);
+      if (data.subject) setTestSubjectId(data.subject);
       
       const total = data.numQuestions || 10;
       setNumQuestions(total);
@@ -103,7 +105,7 @@ export const QuestionEditorPage = () => {
     try {
       const payload: any = {
         testId: id!,
-        questions: questions.map(q => mapDraftToApi(q, {}))
+        questions: questions.map(q => mapDraftToApi(q, { subject: testSubjectId }))
       };
       
       await api.post('/questions/bulk', payload);

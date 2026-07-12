@@ -19,7 +19,7 @@ export interface ApiQuestion {
 }
 
 export function mapDraftToApi(draft: QuestionDraft, additionalData?: Partial<ApiQuestion>): ApiQuestion {
-  return {
+  const apiPayload: ApiQuestion = {
     type: 'mcq', // Currently hardcoded to mcq as mock failed and mcq is required
     question: draft.stem || '',
     option1: draft.options[0]?.text || '',
@@ -27,13 +27,20 @@ export function mapDraftToApi(draft: QuestionDraft, additionalData?: Partial<Api
     option3: draft.options[2]?.text || '',
     option4: draft.options[3]?.text || '',
     correct_option: draft.options.find(o => o.id === draft.correctOptionId)?.text || draft.correctOptionId || '',
-    subject: additionalData?.subject || '',
-    topic: draft.topicId || additionalData?.topic || '',
-    sub_topic: draft.subTopicId || additionalData?.sub_topic || '',
-    difficulty: draft.difficulty || additionalData?.difficulty || '',
+    difficulty: draft.difficulty || additionalData?.difficulty || 'medium',
     explanation: draft.explanation || '',
     media_url: draft.mediaUrl || '',
   };
+
+  const subject = additionalData?.subject;
+  const topic = draft.topicId || additionalData?.topic;
+  const subTopic = draft.subTopicId || additionalData?.sub_topic;
+
+  if (subject) apiPayload.subject = subject;
+  if (topic) apiPayload.topic = topic;
+  if (subTopic) apiPayload.sub_topic = subTopic;
+
+  return apiPayload;
 }
 
 export function mapApiToDraft(apiData: any): QuestionDraft {
