@@ -112,15 +112,15 @@ export const TestForm = () => {
         subject: data.subjectId,
         topics: data.topicIds?.map((t: Option) => t.value) || [],
         sub_topics: data.subTopicIds?.map((t: Option) => t.value) || [],
-        total_time: data.duration,
-        total_questions: data.numQuestions,
-        total_marks: data.totalMarks,
+        total_time: Number(data.duration),
+        total_questions: Number(data.numQuestions),
+        total_marks: Number(data.totalMarks),
         difficulty: data.difficulty === 'difficult' ? 'hard' : (data.difficulty || 'medium').toLowerCase(),
         status: 'draft',
         type: 'mock', 
-        correct_marks: data.markingCorrect,
-        wrong_marks: data.markingWrong,
-        unattempt_marks: data.markingUnattempted
+        correct_marks: Number(data.markingCorrect),
+        wrong_marks: Number(data.markingWrong),
+        unattempt_marks: Number(data.markingUnattempted)
       };
 
       let testId = id;

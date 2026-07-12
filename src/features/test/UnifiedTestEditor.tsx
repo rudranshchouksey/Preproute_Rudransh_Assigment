@@ -306,15 +306,15 @@ export const UnifiedTestEditor = () => {
         subject: testData.subjectId,
         topics: testData.topicIds?.map((t: Option) => t.value).filter(Boolean) || [],
         sub_topics: testData.subTopicIds?.map((t: Option) => t.value).filter(Boolean) || [],
-        total_time: testData.duration,
-        total_questions: testData.numQuestions,
-        total_marks: testData.totalMarks,
+        total_time: Number(testData.duration),
+        total_questions: Number(testData.numQuestions),
+        total_marks: Number(testData.totalMarks),
         difficulty: testData.difficulty === 'difficult' ? 'hard' : (testData.difficulty || 'medium').toLowerCase(),
         status: mode === 'draft' ? 'draft' : 'draft', // Live is set in publish page
         type: testType,
-        correct_marks: testData.markingCorrect,
-        wrong_marks: testData.markingWrong,
-        unattempt_marks: testData.markingUnattempted
+        correct_marks: Number(testData.markingCorrect),
+        wrong_marks: Number(testData.markingWrong),
+        unattempt_marks: Number(testData.markingUnattempted)
       };
 
       let testId = id;
