@@ -1,32 +1,54 @@
-# React + TypeScript + Vite
+﻿# Preproute - Test Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Welcome to the **Preproute** frontend repository! This application is a comprehensive Test Management and Assessment platform built for scale, performance, and seamless user experiences.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Unified Test Editor:** A single, powerful interface to manage Test Details, configure Syllabus/Topics, and build Questions (MCQ/Subjective) seamlessly.
+- **Robust Auto-Save:** Real-time, debounced auto-saving ensures no data is lost during lengthy test creations, with built-in safeguards against malformed API payloads.
+- **Advanced Validation:** Strict frontend-side data validation guarantees that 100% of payloads sent to the backend are valid, eliminating opaque \400 Bad Request\ API crashes.
+- **Pixel-Perfect UI:** A stunning, modern, and responsive user interface mapped strictly to Figma designs. Features dynamic progress bars, customized checkmarks, and responsive layouts.
+- **CSV Bulk Import:** Upload bulk questions effortlessly via CSV while maintaining rich-text formatting.
+- **Secure Authentication:** Protected routing, JWT session management, and role-based access.
 
-## React Compiler
+## 🛠 Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework:** React 18 with TypeScript
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS + Framer Motion (for micro-animations)
+- **Forms & State:** React Hook Form
+- **API Client:** Axios (with custom global interceptors)
+- **Icons:** Lucide React
 
-## Expanding the Oxlint configuration
+## 📦 Getting Started
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+### Prerequisites
+- Node.js (v18+)
+- npm or yarn
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
+### Installation
+1. Clone the repository
+2. Install dependencies:
+   \\\ash
+   npm install
+   \\\
+3. Set up your \.env\ variables based on \.env.example\ (ensure \VITE_API_URL\ points to your backend).
+4. Run the development server:
+   \\\ash
+   npm run dev
+   \\\
+5. Open \http://localhost:5173\ in your browser.
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 📁 Key Folder Structure
+
+\\\	ext
+src/
+├── components/       # Reusable UI components (Buttons, Inputs, Layouts)
+├── features/         # Feature-driven modules (auth, test, questions, publish)
+├── services/         # API configurations, global Axios interceptors
+├── lib/              # Utility functions (e.g., Tailwind class merging)
+└── types/            # Global TypeScript interfaces
+\\\
+
+---
+*Built with ❤️ for scalable education technology.*

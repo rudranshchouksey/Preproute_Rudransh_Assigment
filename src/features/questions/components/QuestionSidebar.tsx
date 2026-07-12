@@ -23,7 +23,7 @@ export const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   if (variant === 'minimal') {
     return (
       <div className="w-full flex flex-col h-[calc(100vh-300px)] overflow-y-auto no-scrollbar pr-2">
-        <div className="grid grid-cols-2 gap-[10px]">
+        <div className="flex flex-col gap-2">
           {questions.map((q, idx) => {
             const isActive = activeIndex === idx;
             const isCompleted = q !== null;
@@ -34,19 +34,28 @@ export const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
                 type="button"
                 onClick={() => onSelect(idx)}
                 className={cn(
-                  "h-[60px] rounded-[8px] flex flex-col items-center justify-center transition-all border relative px-2",
+                  "flex items-center justify-between px-3 py-2 border rounded-lg bg-white transition-all",
                   isActive
-                    ? "bg-[#5984F7] text-white border-[#5984F7]"
-                    : "bg-white text-[#374151] border-[#E5E7EB] hover:border-[#5984F7]"
+                    ? "border-[#5984F7] shadow-sm bg-blue-50/30"
+                    : isCompleted
+                      ? "border-[#0C9D61]"
+                      : "border-gray-200"
                 )}
               >
-                <span className="text-[12px] font-medium leading-[150%]">Question</span>
-                <span className="text-[12px] font-medium leading-[150%]">{idx + 1}</span>
-                {isCompleted && !isActive && (
-                  <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-[16px] h-[16px] rounded-full bg-[#10B981] border-2 border-white flex items-center justify-center">
-                     <CheckCircle2 size={10} className="text-white" />
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {isCompleted ? (
+                    <CheckCircle2 size={14} className={isActive ? "text-[#5984F7]" : "text-[#0C9D61]"} fill="currentColor" stroke="white" />
+                  ) : (
+                    <div className="w-[14px] h-[14px] rounded-full border border-gray-300" />
+                  )}
+                  <span className={cn(
+                    "text-[12px] font-medium",
+                    isActive ? "text-[#5984F7]" : isCompleted ? "text-[#0C9D61]" : "text-gray-500"
+                  )}>
+                    Question {idx + 1}
+                  </span>
+                </div>
+                <ChevronRight size={14} className={isActive ? "text-[#5984F7]" : isCompleted ? "text-[#0C9D61]" : "text-gray-300"} />
               </button>
             );
           })}

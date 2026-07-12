@@ -175,63 +175,56 @@ export const TestPublishPage = () => {
         </div>
 
         {/* Test Detail Card */}
-        <div className="w-full h-[230px] bg-white border border-[#E5E7EB] rounded-[8px] flex items-start justify-between p-[20px] box-border shrink-0 mt-2 relative">
+        <div className="w-full min-h-[230px] h-auto bg-white border border-[#E5E7EB] rounded-[8px] flex flex-col md:flex-row items-start justify-between p-[20px] gap-[20px] box-border shrink-0 mt-2 relative">
           <button type="button" onClick={() => navigate(`/test/edit/${id}`)} className="absolute top-4 right-4 text-[#7489FF] hover:text-blue-600">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
           </button>
           
-          <div className="w-[215px] h-[190px] flex flex-col gap-[20px]">
-            <div className="flex items-end gap-[5px] h-[24px]">
-              <div className="w-[110px] h-[24px] flex items-center justify-center rounded-[12px] px-[10px] py-[5px] box-border" style={{ background: 'linear-gradient(104.9deg, #07013C 0%, #000A3A 102.39%)', border: '0.5px solid #F8FAFF' }}>
+          <div className="flex-1 flex flex-col gap-[20px]">
+            <div className="flex items-end gap-[5px]">
+              <div className="w-auto inline-flex items-center justify-center rounded-[12px] px-[10px] py-[5px] box-border" style={{ background: 'linear-gradient(104.9deg, #07013C 0%, #000A3A 102.39%)', border: '0.5px solid #F8FAFF' }}>
                 <span className="text-[14px] font-normal text-[#F8FAFF] leading-[150%]">Chapter Wise</span>
               </div>
             </div>
             
-            <div className="flex items-end gap-[10px] h-[24px]">
-              <div className="flex items-center gap-[20px] h-[24px]">
-                <div className="flex items-end gap-[5px] h-[24px]">
-                  <div className="w-[24px] h-[24px] rounded-full overflow-hidden flex items-center justify-center bg-[#D9D9D9]">
-                     <div className="w-[16px] h-[16px] rounded-full" style={{ background: 'linear-gradient(90deg, #6C5ABD 15.25%, #CE8302 99.14%)' }}></div>
-                  </div>
-                  <span className="text-[16px] font-bold text-[#000000] leading-[150%]">{testData?.name || 'Chapter 1'}</span>
+            <div className="flex items-center gap-[20px] flex-wrap">
+              <div className="flex items-center gap-[5px]">
+                <div className="w-[24px] h-[24px] rounded-full overflow-hidden flex items-center justify-center bg-[#D9D9D9]">
+                   <div className="w-[16px] h-[16px] rounded-full" style={{ background: 'linear-gradient(90deg, #6C5ABD 15.25%, #CE8302 99.14%)' }}></div>
                 </div>
-                <div className="h-[24px] bg-[#2AB7A9] rounded-[8px] flex items-center justify-center px-[10px] gap-[8px]">
-                   <span className="text-[14px] font-normal text-[#FEFEFF] leading-[150%] capitalize">{testData?.difficulty || 'Easy'}</span>
-                </div>
+                <span className="text-[16px] font-bold text-[#000000] leading-[150%] whitespace-nowrap">{testData?.name || 'Chapter 1'}</span>
+              </div>
+              <div className="bg-[#2AB7A9] rounded-[8px] flex items-center justify-center px-[10px] py-[2px] gap-[8px]">
+                 <span className="text-[14px] font-normal text-[#FEFEFF] leading-[150%] capitalize">{testData?.difficulty || 'Easy'}</span>
               </div>
             </div>
 
-            <div className="flex flex-col gap-[15px] h-[102px]">
-              <div className="flex items-center gap-[5px] h-[24px]">
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[100px]">Subject</span>
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[4px]">:</span>
+            <div className="flex flex-col gap-[15px]">
+              <div className="flex items-center gap-[5px]">
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[80px]">Subject</span>
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[10px]">:</span>
                 <span className="text-[16px] font-medium text-[#6B7280] leading-[150%]">{testData?.subjectId || 'English'}</span>
               </div>
-              <div className="flex items-center gap-[5px] h-[24px]">
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[100px]">Topic</span>
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[4px]">:</span>
-                <div className="flex gap-[5px] h-[24px]">
+              <div className="flex flex-wrap items-center gap-[5px]">
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[80px]">Topic</span>
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[10px]">:</span>
+                <div className="flex flex-wrap gap-[5px]">
                    {testData?.topicIds?.length ? testData.topicIds.map((t: string, i: number) => (
-                      <div key={i} className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
+                      <div key={i} className="border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px] py-[2px]">
                         <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">{t}</span>
                       </div>
                    )) : (
-                      <>
-                        <div className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
-                          <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">Grammar</span>
-                        </div>
-                        <div className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
-                          <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">Writing</span>
-                        </div>
-                      </>
+                      <div className="border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px] py-[2px]">
+                        <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">General</span>
+                      </div>
                    )}
                 </div>
               </div>
-              <div className="flex items-center gap-[5px] h-[24px]">
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[100px]">Sub Topic</span>
-                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[4px]">:</span>
-                <div className="flex gap-[5px] h-[24px]">
-                  <div className="h-[24px] border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px]">
+              <div className="flex flex-wrap items-center gap-[5px]">
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[80px]">Sub Topic</span>
+                <span className="text-[12px] font-normal text-[#6B7180] leading-[150%] w-[10px]">:</span>
+                <div className="flex flex-wrap gap-[5px]">
+                  <div className="border-[0.5px] border-[#E9B406] rounded-[8px] flex items-center justify-center px-[10px] py-[2px]">
                     <span className="text-[14px] font-normal text-[#FFC82C] leading-[150%]">Application</span>
                   </div>
                 </div>
