@@ -4,9 +4,7 @@ import { useForm } from 'react-hook-form';
 import api from '../../services/api';
 
 import { PageHeader } from '../../components/Layout/PageHeader';
-import { Input } from '../../components/ui/Input';
 import { Select } from '../../components/ui/Select';
-import { Label } from '../../components/ui/Label';
 import { Button } from '../../components/ui/Button';
 import { MultiSelect } from '../../components/Form/MultiSelect';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -346,134 +344,177 @@ export const UnifiedTestEditor = () => {
   const typeLabel = testType === 'chapterwise' ? 'Chapter Wise' : testType === 'pyq' ? 'PYQ' : 'Mock Test';
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      {/* Figma style Header */}
-      <div className="px-8 py-5 border-b border-gray-100 flex items-center justify-between">
-        <div className="flex items-center text-sm font-medium text-gray-500">
-          <span>Test Creation</span>
-          <ChevronRight size={16} className="mx-2" />
-          <span>{isEditMode ? 'Edit Test' : 'Create Test'}</span>
-          <ChevronRight size={16} className="mx-2" />
-          <span className="text-gray-900">{typeLabel}</span>
+    <div className="flex flex-col min-h-screen bg-white items-start overflow-x-auto">
+      {/* Top Nav (Pixel Perfect to Figma) */}
+      <div className="w-[1200px] h-[92px] px-[21px] bg-white border-b border-[#E5E7EB] flex items-center justify-between shrink-0 box-border">
+        {/* Breadcrumbs */}
+        <div className="flex items-center gap-[8px] h-[24px]">
+          <span className="text-[16px] font-medium text-black/60 leading-[150%]">Test Creation</span>
+          <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
+          <span className="text-[16px] font-normal text-black/60 leading-[19px]">{isEditMode ? 'Edit Test' : 'Create Test'}</span>
+          <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
+          <span className="text-[16px] font-normal text-black/60 leading-[19px]">{typeLabel}</span>
         </div>
         
-        {currentStep === 2 && (
-          <Button onClick={handleTestSubmit((d) => handleSaveAll(d, 'save'))} isLoading={isSaving} className="bg-[#5984F7] hover:bg-blue-600 text-white rounded-md px-6">
-            Publish
-          </Button>
-        )}
+        {/* Profile Block */}
+        <div className="flex items-center gap-[20px] h-[52px]">
+          <div className="w-[48px] h-[48px] bg-white border border-[#D1D5DB] rounded-[24px] flex items-center justify-center shrink-0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.89 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="#111827"/>
+              <circle cx="16.5" cy="7.5" r="4.5" fill="#0C9D61" stroke="white" strokeWidth="1.5"/>
+            </svg>
+          </div>
+          
+          <div className="flex items-center gap-[9px] h-[52px]">
+            <div className="w-[48px] h-[48px] bg-[#FFD284] border border-[#6366F1] rounded-full overflow-hidden shrink-0 flex items-center justify-center">
+               <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Avatar" className="w-full h-full object-cover" />
+            </div>
+            <div className="flex flex-col gap-[4px] w-[115px] justify-center">
+              <span className="text-[20px] font-semibold text-[#374151] leading-[150%] h-[30px] flex items-center">Alex Wando</span>
+              <span className="text-[12px] font-normal text-[#374151] leading-[150%] h-[18px]">Admin</span>
+            </div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 10L12 15L17 10H7Z" fill="#374151"/>
+            </svg>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 max-w-7xl w-full mx-auto p-8">
+      <div className="w-[1200px] px-[20px] py-[30px] flex flex-col shrink-0">
         {currentStep === 1 ? (
           /* STEP 1: Basic Info Form matching Figma exactly */
-          <div className="max-w-5xl">
+          <div className="w-[1152px] bg-white rounded-[12px] flex flex-col gap-[50px]">
+            
             {/* Test Type Tabs */}
-            <div className="inline-flex rounded-lg border border-gray-200 p-1 mb-8">
-              {[{id: 'chapterwise', label: 'Chapter Wise'}, {id: 'pyq', label: 'PYQ'}, {id: 'mock', label: 'Mock Test'}].map(t => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => setTestType(t.id as any)}
-                  className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
-                    testType === t.id 
-                      ? 'bg-blue-50 text-[#3B82F6]' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  {t.label}
-                </button>
-              ))}
+            <div className="w-[1152px] flex items-center justify-between">
+              <div className="w-[329px] h-[50px] bg-white border-[0.5px] border-[#D1D5DB] rounded-[12px] flex items-center px-[10px] py-[2px] gap-[30px] box-border">
+                {[
+                  { id: 'chapterwise', label: 'Chapterwise', w: 'w-[107px]' }, 
+                  { id: 'pyq', label: 'PYQ', w: 'w-[51px]' }, 
+                  { id: 'mock', label: 'Mock Test', w: 'w-[91px]' }
+                ].map(t => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setTestType(t.id as any)}
+                    className={`h-[40px] flex items-center justify-center px-[11px] py-[3px] box-border transition-colors ${
+                      testType === t.id 
+                        ? `bg-[#F8FAFF] rounded-[8px] ${t.w}`
+                        : `rounded-[48px] ${t.w} hover:bg-gray-50`
+                    }`}
+                  >
+                    <span className={`text-[14px] leading-[150%] h-[21px] ${
+                      testType === t.id ? 'font-medium text-[#384EC7]' : 'font-normal text-[#9CA3AF]'
+                    }`}>
+                      {t.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <form id="test-config-form" onSubmit={handleTestSubmit(handleNextStep)}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                {/* Left Column */}
-                <div className="space-y-8">
-                  <div>
-                    <Label className="text-gray-700 font-semibold mb-2">Subject</Label>
-                    <Select {...registerTest("subjectId", { required: "Subject is required" })} error={(testErrors.subjectId as any)?.message} className="w-full h-12">
-                      <option value="">Choose from Drop-down</option>
-                      {subjects.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </Select>
+            <form id="test-config-form" onSubmit={handleTestSubmit(handleNextStep)} className="flex flex-col gap-[50px]">
+              
+              {/* Row 1 */}
+              <div className="w-[1152px] h-[87px] flex items-start gap-[50px]">
+                <div className="w-[551px] flex flex-col gap-[15px]">
+                  <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Subject</label>
+                  <Select {...registerTest("subjectId", { required: "Subject is required" })} className="w-[551px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] text-[#374151]">
+                    <option value="" className="text-[#D1D5DB]">Choose from Drop-down</option>
+                    {subjects.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </Select>
+                  {testErrors.subjectId && <span className="text-red-500 text-xs">{(testErrors.subjectId as any).message}</span>}
+                </div>
+                
+                <div className="w-[551px] flex flex-col gap-[15px]">
+                  <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Name of Test</label>
+                  <input type="text" {...registerTest("name", { required: "Test name is required" })} placeholder="Enter name of Test" className="w-[551px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
+                  {testErrors.name && <span className="text-red-500 text-xs">{(testErrors.name as any).message}</span>}
+                </div>
+              </div>
+
+              {/* Row 2 */}
+              <div className="w-[1152px] h-[87px] flex items-start gap-[50px]">
+                <div className="w-[551px] flex flex-col gap-[15px]">
+                  <MultiSelect name="topicIds" control={control} options={topics} label="Topic" placeholder="Choose from Drop-down" isDisabled={!selectedSubject || topics.length === 0} />
+                </div>
+                
+                <div className="w-[551px] flex flex-col gap-[15px]">
+                  <MultiSelect name="subTopicIds" control={control} options={subTopics} label="Sub Topic" placeholder="Choose from Drop-down" isDisabled={!selectedTopics || selectedTopics.length === 0 || subTopics.length === 0} />
+                </div>
+              </div>
+
+              {/* Row 3 */}
+              <div className="w-[1152px] h-[87px] flex items-start gap-[50px]">
+                <div className="w-[551px] flex flex-col gap-[15px]">
+                  <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Duration (Minutes)</label>
+                  <input type="number" {...registerTest("duration", { required: "Duration is required", valueAsNumber: true })} placeholder="Enter the time" className="w-[551px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
+                  {testErrors.duration && <span className="text-red-500 text-xs">{(testErrors.duration as any).message}</span>}
+                </div>
+                
+                <div className="w-[551px] flex flex-col gap-[30px]">
+                  <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Test Difficulty Level</label>
+                  <div className="w-[510px] h-[24px] flex items-center gap-[30px]">
+                    {['Easy', 'Medium', 'Difficult'].map((level) => (
+                      <label key={level} className="flex items-center gap-[10px] cursor-pointer">
+                        <div className="w-[24px] h-[24px] rounded-full bg-[#D9D9D9] flex items-center justify-center">
+                          <input type="radio" value={level.toLowerCase()} {...registerTest("difficulty")} className="w-[16px] h-[16px] text-[#7489FF] bg-[#7489FF] border-none focus:ring-0" defaultChecked={level === 'Medium'} />
+                        </div>
+                        <span className="text-[16px] font-medium text-[#374151] leading-[150%]">{level}</span>
+                      </label>
+                    ))}
                   </div>
-                  
-                  <div>
-                    <MultiSelect name="topicIds" control={control} options={topics} label="Topic" placeholder="Choose from Drop-down" isDisabled={!selectedSubject || topics.length === 0} />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-gray-700 font-semibold mb-2">Duration (Minutes)</Label>
-                    <Input type="number" {...registerTest("duration", { required: "Duration is required", valueAsNumber: true })} error={(testErrors.duration as any)?.message} placeholder="Enter the time" className="h-12" />
-                  </div>
-                  
-                  <div>
-                    <Label className="text-gray-700 font-semibold mb-4 block">Marking Scheme:</Label>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2">Wrong Answer</Label>
-                        <Input type="number" defaultValue={-1} {...registerTest("markingWrong")} className="h-11" />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2">Unattempted</Label>
-                        <Input type="number" defaultValue={0} {...registerTest("markingUnattempted")} className="h-11" />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium text-gray-700 mb-2">Correct Answer</Label>
-                        <Input type="number" defaultValue={5} {...registerTest("markingCorrect")} className="h-11" />
-                      </div>
+                </div>
+              </div>
+
+              {/* Row 4: Marking Scheme & Totals */}
+              <div className="w-[1152px] h-[141px] flex items-start gap-[50px]">
+                
+                <div className="w-[551px] flex flex-col gap-[30px]">
+                  <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Marking Scheme:</label>
+                  <div className="w-[551px] h-[87px] flex items-center gap-[50px]">
+                    <div className="w-[150.33px] flex flex-col gap-[15px]">
+                      <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Wrong Answer</label>
+                      <input type="number" defaultValue={-1} {...registerTest("markingWrong")} className="w-[150.33px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#111827] outline-none focus:border-blue-500" />
+                    </div>
+                    <div className="w-[150.33px] flex flex-col gap-[15px]">
+                      <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Unattempted</label>
+                      <input type="number" defaultValue={0} {...registerTest("markingUnattempted")} className="w-[150.33px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#111827] outline-none focus:border-blue-500" />
+                    </div>
+                    <div className="w-[150.33px] flex flex-col gap-[15px]">
+                      <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Correct Answer</label>
+                      <input type="number" defaultValue={5} {...registerTest("markingCorrect")} className="w-[150.33px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#111827] outline-none focus:border-blue-500" />
                     </div>
                   </div>
                 </div>
 
-                {/* Right Column */}
-                <div className="space-y-8">
-                  <div>
-                    <Label className="text-gray-700 font-semibold mb-2">Name of Test</Label>
-                    <Input type="text" {...registerTest("name", { required: "Test name is required" })} error={(testErrors.name as any)?.message} placeholder="Enter name of Test" className="h-12" />
+                <div className="w-[551px] h-[87px] flex flex-row items-end pb-[1px] gap-[50px]">
+                  <div className="w-[250.5px] flex flex-col gap-[15px]">
+                    <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">No of Questions</label>
+                    <input type="number" {...registerTest("numQuestions", { valueAsNumber: true })} placeholder="Ex:250 Marks" className="w-[250.5px] h-[48px] bg-white border border-[#D1D5DB] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
                   </div>
-
-                  <div>
-                    <MultiSelect name="subTopicIds" control={control} options={subTopics} label="Sub Topic" placeholder="Choose from Drop-down" isDisabled={!selectedTopics || selectedTopics.length === 0 || subTopics.length === 0} />
-                  </div>
-
-                  <div>
-                    <Label className="text-gray-700 font-semibold mb-4 block">Test Difficulty Level</Label>
-                    <div className="flex gap-8 h-12 items-center">
-                      {['Easy', 'Medium', 'Difficult'].map((level) => (
-                        <label key={level} className="flex items-center space-x-2 cursor-pointer">
-                          <input type="radio" value={level.toLowerCase()} {...registerTest("difficulty")} className="w-5 h-5 text-[#3B82F6] border-gray-300 focus:ring-[#3B82F6]" defaultChecked={level === 'Medium'} />
-                          <span className="text-gray-700 font-medium">{level}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <Label className="text-gray-700 font-semibold mb-2">No of Questions</Label>
-                      <Input type="number" {...registerTest("numQuestions", { valueAsNumber: true })} placeholder="Ex:50" className="h-12" />
-                    </div>
-                    <div>
-                      <Label className="text-gray-300 font-semibold mb-2">Total Marks</Label>
-                      <Input type="number" {...registerTest("totalMarks", { valueAsNumber: true })} placeholder="Ex:250 Marks" className="h-12 bg-gray-50 border-gray-200 text-gray-400 placeholder:text-gray-300" />
-                    </div>
+                  <div className="w-[250.5px] flex flex-col gap-[15px]">
+                    <label className="text-[16px] font-medium text-[#D1D5DB] leading-[150%] h-[24px]">Total Marks</label>
+                    <input type="number" {...registerTest("totalMarks", { valueAsNumber: true })} placeholder="Ex:250 Marks" className="w-[250.5px] h-[48px] bg-white border border-[#D1D5DB] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
                   </div>
                 </div>
+
               </div>
 
               {/* Bottom Actions */}
-              <div className="flex justify-end gap-4 mt-12 pt-8">
-                <Button type="button" variant="ghost" className="bg-[#F8FAFC] text-[#3B82F6] hover:bg-blue-50 h-12 px-8 font-semibold rounded-lg" onClick={() => navigate('/')}>
-                  Cancel
-                </Button>
-                <Button type="submit" className="bg-[#5984F7] hover:bg-blue-600 text-white h-12 px-12 font-semibold rounded-lg shadow-sm">
-                  Next
-                </Button>
+              <div className="w-[1152px] h-[44px] flex justify-end gap-[20px] mt-[10px]">
+                <button type="button" onClick={() => navigate('/')} className="w-[112px] h-[44px] bg-[#F8FAFC] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors">
+                  <span className="text-[16px] font-medium text-[#384EC7] leading-[150%]">Cancel</span>
+                </button>
+                <button type="submit" className="w-[112px] h-[44px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
+                  <span className="text-[16px] font-medium text-white leading-[150%]">Next</span>
+                </button>
               </div>
+
             </form>
           </div>
         ) : (
+
           /* STEP 2: Question Editor Layout matching Figma Image 4 */
           <div className="flex gap-8 h-full min-h-[800px]">
             {/* Left Sidebar */}
