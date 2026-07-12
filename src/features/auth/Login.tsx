@@ -23,19 +23,18 @@ export const Login = () => {
         setError('Login failed: No token received.');
       }
     } catch (err: any) {
-      // In case of error (or if the API isn't up, we can use the hardcoded check for dev purposes if requested, but instructions say "Integrate the POST /auth/login endpoint... Hardcoded test credentials for verification". We should send them to the API)
       setError(err.response?.data?.message || 'Invalid credentials or server error.');
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-white font-sans">
-      {/* Left side graphic (Hidden on small screens) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-[#FAFCFF] items-center justify-center p-12 relative border-r border-gray-100">
-        <div className="relative w-[500px] h-[500px] flex items-center justify-center">
-          {/* Custom SVG Illustration trying to match the mascot */}
-          <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Sparkles */}
+    <div className="flex h-screen w-full bg-[#F7FBFF] font-sans overflow-hidden">
+      
+      {/* Left side illustration */}
+      <div className="hidden lg:flex w-1/2 h-full items-center justify-center relative">
+        <div className="w-[467px] h-[344px] relative flex items-center justify-center">
+          {/* Custom SVG Illustration for Test Tube Man */}
+          <svg width="467" height="344" viewBox="0 0 467 344" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M70 150 L75 145 L80 150 L75 155 Z" fill="#A0AABF" />
             <path d="M75 135 L76 142 M75 165 L76 158 M60 150 L67 150 M90 150 L83 150" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" />
             
@@ -52,11 +51,11 @@ export const Login = () => {
             <line x1="260" y1="214" x2="260" y2="300" stroke="#9CA3AF" strokeWidth="2" />
             <line x1="340" y1="214" x2="340" y2="300" stroke="#9CA3AF" strokeWidth="2" />
 
-            {/* Mascot Body (Vertical Pipe) */}
+            {/* Mascot Body */}
             <rect x="175" y="100" width="50" height="150" fill="white" stroke="#6B7280" strokeWidth="2" />
-            <rect x="165" y="90" width="70" height="10" fill="#E0F2FE" />
-            <rect x="165" y="250" width="70" height="10" fill="#E0F2FE" />
-            {/* Pipe creases */}
+            <rect x="165" y="90" width="70" height="10" fill="#BFDBFE" />
+            <rect x="165" y="250" width="70" height="10" fill="#BFDBFE" />
+            
             <path d="M175 190 L225 190" stroke="#6B7280" strokeWidth="1.5" strokeDasharray="4 2" />
             <path d="M175 220 L225 220" stroke="#6B7280" strokeWidth="1.5" />
 
@@ -69,89 +68,108 @@ export const Login = () => {
             <path d="M185 150 C 160 180, 190 200, 195 200" stroke="#6B7280" strokeWidth="2" fill="none" />
             <path d="M215 150 C 250 170, 270 210, 250 220 C 230 230, 220 200, 220 200" stroke="#6B7280" strokeWidth="2" fill="none" />
 
-            {/* Hands typing */}
+            {/* Hands */}
             <circle cx="220" cy="202" r="5" fill="white" stroke="#6B7280" strokeWidth="1.5" />
             <circle cx="230" cy="204" r="5" fill="white" stroke="#6B7280" strokeWidth="1.5" />
             <circle cx="240" cy="206" r="5" fill="white" stroke="#6B7280" strokeWidth="1.5" />
 
             {/* Laptop */}
             <path d="M90 140 L160 140 L180 205 L60 205 Z" fill="#E5E7EB" stroke="#D1D5DB" strokeWidth="1" />
-            {/* Laptop Screen glow */}
             <path d="M95 145 L155 145 L170 195 L75 195 Z" fill="white" opacity="0.6" />
           </svg>
         </div>
       </div>
 
       {/* Right side login form */}
-      <div className="flex w-full lg:w-1/2 items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-[400px]">
-          {/* Logo */}
-          <div className="mb-10 flex items-center">
-            {/* Preproute Text Logo matching Figma */}
-            <div className="flex items-center text-[#3B82F6] font-extrabold text-3xl tracking-tight">
-              <span className="relative z-10">P</span>
-              <span className="relative z-10">r</span>
-              <span className="relative z-10">e</span>
-              <span className="relative z-10">p</span>
-              <div className="flex -mx-1 mt-1 z-0 relative overflow-hidden h-4 w-12 bg-[#111827] rounded-sm transform skew-x-[-15deg] flex items-center justify-between px-1">
-                <div className="w-1 h-2 bg-white rounded-full"></div>
-                <div className="w-1 h-2 bg-white rounded-full"></div>
-                <div className="w-1 h-2 bg-white rounded-full"></div>
-                <div className="w-1 h-2 bg-white rounded-full"></div>
-              </div>
-              <span className="relative z-10">o</span>
-              <span className="relative z-10">u</span>
-              <span className="relative z-10">t</span>
-              <span className="relative z-10">e</span>
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Login</h2>
-            <p className="text-sm text-gray-500 font-medium">Use your company provided Login credentials</p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">User ID</label>
-              <input
-                type="text"
-                {...register("username", { required: "User ID is required" })}
-                className={`w-full px-4 py-2.5 rounded-lg border ${errors.username ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-[#3B82F6] focus:ring-[#3B82F6]'} outline-none transition-colors text-sm placeholder:text-gray-400`}
-                placeholder="Enter User ID"
-              />
-              {errors.username && <p className="text-red-500 text-xs mt-1.5">{(errors.username as any).message}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
-              <input
-                type="password"
-                {...register("password", { required: "Password is required" })}
-                className={`w-full px-4 py-2.5 rounded-lg border ${errors.password ? 'border-red-500 focus:ring-red-500' : 'border-gray-200 focus:border-[#3B82F6] focus:ring-[#3B82F6]'} outline-none transition-colors text-sm placeholder:text-gray-400`}
-                placeholder="Enter Password"
-              />
-              {errors.password && <p className="text-red-500 text-xs mt-1.5">{(errors.password as any).message}</p>}
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg border border-red-100">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <a href="#" className="text-sm text-[#3B82F6] hover:underline font-medium inline-block mb-4">
-                Forgot password?
-              </a>
-              <button type="submit" className="w-full py-3 bg-[#5984F7] hover:bg-blue-600 text-white rounded-lg font-semibold text-base transition-colors shadow-sm">
-                Login
-              </button>
-            </div>
-          </form>
+      <div className="w-full lg:w-1/2 h-full flex items-center justify-center p-[20px]">
+        <div className="w-[710px] h-[988px] bg-white border-[0.5px] border-[#60A5FA] rounded-[8px] flex flex-col items-center justify-center px-[100px] py-[250px] box-border">
           
-          <div className="mt-8 text-center text-xs text-gray-400">
-            For testing use <span className="font-semibold text-gray-600">vedant-admin</span> / <span className="font-semibold text-gray-600">vedant123</span>
+          <div className="w-[510px] flex flex-col gap-[30px]">
+            
+            {/* Header Section */}
+            <div className="flex flex-col gap-[30px]">
+              {/* Logo */}
+              <div className="w-[134.74px] h-[33.04px] flex items-center">
+                <div className="flex items-center text-[#1B5DEF] font-extrabold text-[28px] tracking-tight">
+                  <span className="relative z-10 text-[#000A3A]">P</span>
+                  <span className="relative z-10 text-[#1B5DEF]">r</span>
+                  <span className="relative z-10 text-[#1B5DEF]">e</span>
+                  <span className="relative z-10 text-[#1B5DEF]">p</span>
+                  <div className="flex -mx-1 mt-1 z-0 relative overflow-hidden h-[18px] w-[35px] bg-[#000A3A] rounded-sm transform skew-x-[0deg] items-center justify-between px-[2px]">
+                    <div className="w-[2px] h-[4px] bg-white rounded-full"></div>
+                    <div className="w-[2px] h-[4px] bg-white rounded-full"></div>
+                    <div className="w-[2px] h-[4px] bg-white rounded-full"></div>
+                    <div className="w-[2px] h-[4px] bg-white rounded-full"></div>
+                  </div>
+                  <span className="relative z-10 text-[#1B5DEF]">o</span>
+                  <span className="relative z-10 text-[#1B5DEF]">u</span>
+                  <span className="relative z-10 text-[#1B5DEF]">t</span>
+                  <span className="relative z-10 text-[#1B5DEF]">e</span>
+                </div>
+              </div>
+
+              {/* Title & Subtitle */}
+              <div className="flex flex-col gap-[20px]">
+                <h1 className="text-[20px] font-semibold text-[#374151] leading-[150%] h-[30px] m-0">Login</h1>
+                <p className="text-[12px] font-normal text-[#374151] leading-[150%] h-[18px] m-0">
+                  Use your company provided Login credentials
+                </p>
+              </div>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-[30px]">
+              
+              {/* User ID Field */}
+              <div className="flex flex-col gap-[15px]">
+                <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">User ID</label>
+                <div className={`w-[510px] h-[48px] bg-white border-[0.5px] rounded-[8px] flex items-center px-[16px] py-0 gap-[8px] box-border ${errors.username ? 'border-red-500' : 'border-[#9CA3AF]'}`}>
+                  <input
+                    type="text"
+                    {...register("username", { required: "User ID is required" })}
+                    className="w-full h-full outline-none bg-transparent text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB]"
+                    placeholder="Enter User ID"
+                  />
+                </div>
+                {errors.username && <span className="text-red-500 text-[12px]">{(errors.username as any).message}</span>}
+              </div>
+
+              {/* Password Field */}
+              <div className="flex flex-col gap-[15px]">
+                <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Password</label>
+                <div className={`w-[510px] h-[48px] bg-white border-[0.5px] rounded-[8px] flex items-center px-[16px] py-0 gap-[8px] box-border ${errors.password ? 'border-red-500' : 'border-[#9CA3AF]'}`}>
+                  <input
+                    type="password"
+                    {...register("password", { required: "Password is required" })}
+                    className="w-full h-full outline-none bg-transparent text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB]"
+                    placeholder="Enter Password"
+                  />
+                </div>
+                {errors.password && <span className="text-red-500 text-[12px]">{(errors.password as any).message}</span>}
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 text-red-700 text-sm rounded-[8px] border border-red-100 w-[510px]">
+                  {error}
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex flex-col gap-[30px]">
+                <a href="#" className="text-[14px] font-normal text-[#1B5DEF] leading-[150%] h-[21px] hover:underline cursor-pointer">
+                  Forgot password?
+                </a>
+                
+                <button 
+                  type="submit" 
+                  className="w-[510px] h-[48px] bg-[#5988EF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors"
+                >
+                  <span className="text-[16px] font-medium text-[#FAFAFA] leading-[150%]">Login</span>
+                </button>
+              </div>
+
+            </form>
+
           </div>
         </div>
       </div>
