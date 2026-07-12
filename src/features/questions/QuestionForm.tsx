@@ -4,18 +4,21 @@ import type { QuestionDraft } from './types';
 import { ChapterInfoCard } from './components/ChapterInfoCard';
 import { RichTextEditor } from './components/RichTextEditor';
 import { OptionCard } from './components/OptionCard';
-import { PropertiesSidebar } from './components/PropertiesSidebar';
 import { Button } from '../../components/ui/Button';
-import { Copy } from 'lucide-react';
+import { Select } from '../../components/ui/Select';
+import { Label } from '../../components/ui/Label';
+import { Trash2, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { Textarea } from '../../components/ui/Textarea';
 
 interface QuestionFormProps {
   initialData: QuestionDraft | null;
   onSave: (data: QuestionDraft) => void;
   onClear: () => void;
-  onDuplicate?: () => void;
   questionNumber: number;
   testName?: string;
   numQuestions?: number;
+  onOpenCsv?: () => void;
+  onNavigate?: (index: number) => void;
 }
 
 export interface QuestionFormRef {
@@ -26,12 +29,13 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
   initialData, 
   onSave, 
   onClear,
-  onDuplicate,
   questionNumber,
   testName = 'Untitled Test',
-  numQuestions = 10
+  numQuestions = 10,
+  onOpenCsv,
+  onNavigate
 }, ref) => {
-  const { register, handleSubmit, reset, watch, getValues, setValue, control, formState: { errors } } = useForm<QuestionDraft>({
+  const { register, handleSubmit, reset, watch, getValues, control, formState: { errors } } = useForm<QuestionDraft>({
     defaultValues: initialData || {
       stem: '',
       options: [
@@ -78,29 +82,45 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
   }, [initialData, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSave)} className="flex h-full w-full flex-col xl:flex-row">
-      
-      {/* Main Form Content Canvas */}
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 no-scrollbar relative min-w-0">
-        <div className="max-w-3xl mx-auto pb-12">
+    <form onSubmit={handleSubmit(onSave)} className="flex h-full w-full flex-col">
+      <div className="flex-1 overflow-y-auto pt-2 pb-12 no-scrollbar min-w-0">
+        <div className="max-w-4xl mx-auto">
           <ChapterInfoCard testName={testName} numQuestions={numQuestions} />
 
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Question {questionNumber} Editor</h2>
-            {onDuplicate && (
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm"
-                onClick={onDuplicate}
-                className="text-brand hover:text-brand-dark"
-              >
-                <Copy size={14} className="mr-1.5" />
-                Duplicate
+          {/* Question Header & Actions */}
+          <div className="flex items-center justify-between mb-4 mt-6">
+            <h2 className="text-lg font-bold text-gray-900">
+              Question {questionNumber}<span className="text-brand font-medium">/{numQuestions}</span>
+            </h2>
+            <div className="flex gap-3">
+              <Button type="button" variant="outline" className="h-9 px-4 text-gray-600 font-medium">
+                <Plus size={16} className="mr-1.5 text-gray-400" />
+                MCQ
               </Button>
-            )}
+              <Button type="button" variant="outline" className="h-9 px-4 text-gray-600 font-medium" onClick={onOpenCsv}>
+                <Plus size={16} className="mr-1.5 text-gray-400" />
+                CSV
+              </Button>
+            </div>
           </div>
 
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete all edits for this question?')) {
+                  onClear();
+                  reset();
+                }
+              }}
+              className="text-[#FF7D7D] flex items-center text-sm font-semibold hover:text-red-500 transition-colors"
+            >
+              <Trash2 size={14} className="mr-1.5" />
+              Delete All Edits
+            </button>
+          </div>
+
+          {/* Rich Text Editor */}
           <div className="space-y-6">
             <Controller
               name="stem"
@@ -108,17 +128,16 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
               rules={{ required: 'Question text is required' }}
               render={({ field }) => (
                 <RichTextEditor
-                  label="Question Text *"
                   error={errors.stem?.message}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder="Enter the question here..."
+                  placeholder="Type here"
                 />
               )}
             />
 
             <div className="mt-8">
-              <label className="block text-sm font-medium text-gray-900 mb-4">Options (Select the correct answer) *</label>
+              <label className="block text-sm font-bold text-gray-900 mb-4">Type the options below</label>
               <div className="space-y-4">
                 {[0, 1, 2, 3].map((index) => (
                   <OptionCard
@@ -132,33 +151,74 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
               {errors.options && <p className="text-red-500 text-xs mt-2 font-medium">All options must be filled.</p>}
             </div>
             
-            <div className="mt-10 flex justify-between items-center pt-6 border-t border-gray-100">
-              <Button 
-                variant="ghost"
-                type="button" 
-                onClick={() => {
-                  if (window.confirm('Are you sure you want to delete this question? This cannot be undone.')) {
-                    onClear();
-                    reset();
-                  }
-                }}
-                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                Delete Question
-              </Button>
-              <Button type="submit">
-                Save & Continue
-              </Button>
+            {/* Add Solution */}
+            <div className="mt-8">
+              <label className="block text-sm font-bold text-gray-900 mb-4">Add Solution</label>
+              <Textarea 
+                {...register('explanation')} 
+                placeholder="Type here"
+                className="h-32 resize-none bg-white border-gray-200 shadow-sm"
+              />
             </div>
+
+            {/* Pagination Arrows */}
+            <div className="flex justify-center items-center gap-12 mt-8 mb-12">
+              <button 
+                type="button" 
+                className="text-gray-400 hover:text-gray-600 p-2"
+                onClick={() => onNavigate && onNavigate(questionNumber - 2)}
+                disabled={questionNumber <= 1}
+              >
+                <ChevronLeft size={20} strokeWidth={2.5} className={questionNumber <= 1 ? "opacity-30" : ""} />
+              </button>
+              <button 
+                type="button" 
+                className="text-gray-400 hover:text-gray-600 p-2"
+                onClick={() => onNavigate && onNavigate(questionNumber)}
+                disabled={questionNumber >= numQuestions}
+              >
+                <ChevronRight size={20} strokeWidth={2.5} className={questionNumber >= numQuestions ? "opacity-30" : ""} />
+              </button>
+            </div>
+
+            {/* Question settings */}
+            <div className="border-t border-gray-100 pt-8 pb-8 space-y-6">
+              <h3 className="font-semibold text-gray-900 text-sm">Question settings</h3>
+              
+              <div className="space-y-6">
+                <div>
+                  <Label className="text-gray-600 font-semibold mb-2">Level of Difficulty</Label>
+                  <Select {...register('difficulty')} className="h-12 w-full max-w-lg text-gray-500 bg-white">
+                    <option value="">Select from Drop-down</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="difficult">Difficult</option>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-gray-600 font-semibold mb-2">Topic</Label>
+                  <Select {...register('topicId')} className="h-12 w-full max-w-lg text-gray-500 bg-white">
+                    <option value="">Select from Drop-down</option>
+                    <option value="Grammar">Grammar</option>
+                    <option value="Writing">Writing</option>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label className="text-gray-600 font-semibold mb-2">Sub-topic</Label>
+                  <Select {...register('subTopicId')} className="h-12 w-full max-w-lg text-gray-500 bg-white">
+                    <option value="">Select from Drop-down</option>
+                    <option value="Application">Application</option>
+                    <option value="Comprehension">Comprehension</option>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
-
-      {/* Right Properties Sidebar */}
-      <div className="w-full xl:w-80 border-t xl:border-t-0 xl:border-l border-gray-200 bg-gray-50/50 shrink-0">
-        <PropertiesSidebar register={register} control={control} setValue={setValue} />
-      </div>
-      
     </form>
   );
 });

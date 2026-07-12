@@ -8,6 +8,7 @@ interface QuestionSidebarProps {
   activeIndex: number;
   numQuestions: number;
   onSelect: (index: number) => void;
+  variant?: 'default' | 'minimal';
 }
 
 export const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
@@ -15,9 +16,45 @@ export const QuestionSidebar: React.FC<QuestionSidebarProps> = ({
   activeIndex,
   numQuestions,
   onSelect,
+  variant = 'default',
 }) => {
   const completedCount = questions.filter((q) => q !== null).length;
 
+  if (variant === 'minimal') {
+    return (
+      <div className="w-full flex flex-col h-[calc(100vh-300px)] overflow-y-auto no-scrollbar pr-2">
+        <div className="grid grid-cols-2 gap-3">
+          {questions.map((q, idx) => {
+            const isActive = activeIndex === idx;
+            const isCompleted = q !== null;
+
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => onSelect(idx)}
+                className={cn(
+                  "py-2 px-3 rounded-lg text-sm font-semibold flex items-center justify-between transition-all border",
+                  isActive
+                    ? "bg-[#5984F7] text-white border-[#5984F7]"
+                    : "bg-white text-gray-500 border-gray-200 hover:border-[#5984F7]"
+                )}
+              >
+                <span>Question {idx + 1}</span>
+                {isCompleted && !isActive && (
+                  <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                     <CheckCircle2 size={12} className="text-white" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // Default Variant
   return (
     <aside className="w-full md:w-72 bg-white border-r border-gray-200 flex flex-col h-48 md:h-full shrink-0 shadow-sm z-10 border-b md:border-b-0">
       <div className="p-5 border-b border-gray-100">
