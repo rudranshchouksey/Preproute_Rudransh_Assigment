@@ -340,44 +340,23 @@ export const UnifiedTestEditor = () => {
   const testName = watchTest('name') || 'Untitled Test';
   const numQuestions = watchTest('numQuestions') || 10;
   
-  // Figma breadcrumbs: Test Creation / Create Test / Chapter Wise
-  const typeLabel = testType === 'chapterwise' ? 'Chapter Wise' : testType === 'pyq' ? 'PYQ' : 'Mock Test';
+  // Figma Layout logic for Test Creation Modal
 
   return (
     <div className="flex flex-col min-h-screen bg-white items-start overflow-x-auto">
-      {/* Top Nav (Pixel Perfect to Figma) */}
-      <div className="w-[1200px] h-[92px] px-[21px] bg-white border-b border-[#E5E7EB] flex items-center justify-between shrink-0 box-border">
-        {/* Breadcrumbs */}
-        <div className="flex items-center gap-[8px] h-[24px]">
-          <span className="text-[16px] font-medium text-black/60 leading-[150%]">Test Creation</span>
-          <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
-          <span className="text-[16px] font-normal text-black/60 leading-[19px]">{isEditMode ? 'Edit Test' : 'Create Test'}</span>
-          <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
-          <span className="text-[16px] font-normal text-black/60 leading-[19px]">{typeLabel}</span>
+      {/* Modal Header (Pixel Perfect to Figma) */}
+      <div className="w-[1200px] h-[72px] px-[20px] bg-white flex items-center justify-between shrink-0 box-border">
+        {/* Title */}
+        <div className="flex items-center gap-[10px] h-[24px]">
+          <span className="text-[16px] font-medium text-black/60 leading-[150%]">Edit Test creation</span>
         </div>
         
-        {/* Profile Block */}
-        <div className="flex items-center gap-[20px] h-[52px]">
-          <div className="w-[48px] h-[48px] bg-white border border-[#D1D5DB] rounded-[24px] flex items-center justify-center shrink-0">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.89 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="#111827"/>
-              <circle cx="16.5" cy="7.5" r="4.5" fill="#0C9D61" stroke="white" strokeWidth="1.5"/>
-            </svg>
-          </div>
-          
-          <div className="flex items-center gap-[9px] h-[52px]">
-            <div className="w-[48px] h-[48px] bg-[#FFD284] border border-[#6366F1] rounded-full overflow-hidden shrink-0 flex items-center justify-center">
-               <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Avatar" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex flex-col gap-[4px] w-[115px] justify-center">
-              <span className="text-[20px] font-semibold text-[#374151] leading-[150%] h-[30px] flex items-center">Alex Wando</span>
-              <span className="text-[12px] font-normal text-[#374151] leading-[150%] h-[18px]">Admin</span>
-            </div>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M7 10L12 15L17 10H7Z" fill="#374151"/>
-            </svg>
-          </div>
-        </div>
+        {/* Close Button */}
+        <button type="button" onClick={() => navigate('/')} className="w-[24px] h-[24px] flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-full transition-colors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="#111827"/>
+          </svg>
+        </button>
       </div>
 
       <div className="w-[1200px] px-[20px] py-[30px] flex flex-col shrink-0">
@@ -507,7 +486,7 @@ export const UnifiedTestEditor = () => {
                   <span className="text-[16px] font-medium text-[#384EC7] leading-[150%]">Cancel</span>
                 </button>
                 <button type="submit" className="w-[112px] h-[44px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
-                  <span className="text-[16px] font-medium text-white leading-[150%]">Next</span>
+                  <span className="text-[16px] font-medium text-white leading-[150%]">Save</span>
                 </button>
               </div>
 
