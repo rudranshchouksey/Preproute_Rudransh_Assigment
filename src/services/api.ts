@@ -28,6 +28,29 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
+    } else if (error.response?.status === 400) {
+      // Deep logging for 400 Bad Request to trace exact cause
+      console.error("❌ 400 Bad Request Error Intercepted!");
+      console.error("Target URL:", error.config?.url);
+      console.error("Payload Sent:", JSON.parse(error.config?.data || '{}'));
+      console.error("Backend Response:", error.response?.data);
+
+      // Attempt to extract specific validation messages
+      const resData = error.response?.data;
+      if (resData) {
+        // If the backend returns a specific field error e.g. { field: "difficulty", message: "Difficulty is required" }
+        if (resData.field && resData.message) {
+           error.message = `${resData.field}: ${resData.message}`;
+        }
+        // If it's a generic message property
+        else if (resData.message) {
+           error.message = resData.message;
+        } 
+        // If it's an array of errors (Zod / Express Validator)
+        else if (Array.isArray(resData.errors)) {
+           error.message = resData.errors.map((e: any) => e.message || JSON.stringify(e)).join(', ');
+        }
+      }
     }
     return Promise.reject(error);
   }

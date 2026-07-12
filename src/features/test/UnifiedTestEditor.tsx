@@ -146,14 +146,17 @@ export const UnifiedTestEditor = () => {
   }, [selectedTopics, setTestValue]);
 
   // Auto-save (edit mode only, every 30s of inactivity)
+  const isAutoSavingRef = useRef(false);
+
   const triggerAutoSave = useCallback(() => {
-    if (!isEditMode || isSaving) return;
+    if (!isEditMode || isSaving || isAutoSavingRef.current) return;
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
 
     autoSaveTimerRef.current = setTimeout(async () => {
       try {
+        isAutoSavingRef.current = true;
         let currentQuestions = [...questions];
-        if (questionFormRef.current) {
+        if (questionFormRef.current && currentStep === 2) {
           currentQuestions[activeIndex] = questionFormRef.current.getCurrentData();
         }
 
@@ -163,9 +166,10 @@ export const UnifiedTestEditor = () => {
 
         await api.put(`/tests/${id}`, payload);
 
-        const validQuestions = currentQuestions
-          .filter(q => q !== null && q.stem && q.stem.trim() !== '')
-          .map(q => {
+        const validQuestions = [];
+        for (let i = 0; i < currentQuestions.length; i++) {
+          const q = currentQuestions[i];
+          if (q !== null && q.stem && q.stem.trim() !== '') {
              const clean = { ...q } as any;
              if (!clean.topicId) delete clean.topicId;
              if (!clean.subTopicId) delete clean.subTopicId;
@@ -173,8 +177,16 @@ export const UnifiedTestEditor = () => {
              if (clean.options) {
                clean.options = clean.options.filter((o: any) => o.text && o.text.trim() !== '');
              }
-             return clean;
-          });
+             
+             // Strict validations for AutoSave - silent skip if invalid
+             if (!clean.options || clean.options.length < 2) continue;
+             if (!clean.correctOptionId) continue;
+             const hasCorrect = clean.options.some((o: any) => o.id === clean.correctOptionId);
+             if (!hasCorrect) continue;
+
+             validQuestions.push(clean);
+          }
+        }
           
         if (validQuestions.length > 0) {
           await api.post('/questions/bulk', {
@@ -186,9 +198,11 @@ export const UnifiedTestEditor = () => {
       } catch (err) {
         // Silent fail for auto-save
         console.warn('Auto-save failed', err);
+      } finally {
+        isAutoSavingRef.current = false;
       }
-    }, 30000);
-  }, [isEditMode, isSaving, questions, activeIndex, id]);
+    }, 5000); // 5s debounce for auto-save
+  }, [isEditMode, isSaving, questions, activeIndex, id, currentStep]);
 
   useEffect(() => {
     if (isEditMode) triggerAutoSave();
@@ -276,6 +290,10 @@ export const UnifiedTestEditor = () => {
 
   const handleSaveAll = async (testData: Record<string, any>, mode: 'draft' | 'save' = 'save') => {
     try {
+      if (!testData.name || !testData.subjectId || !testData.duration || !testData.numQuestions) {
+        throw new Error("Missing required test fields: Name, Subject, Duration, or Number of Questions.");
+      }
+
       setIsSaving(true);
       let currentQuestions = [...questions];
       if (questionFormRef.current && currentStep === 2) {
@@ -286,8 +304,8 @@ export const UnifiedTestEditor = () => {
       const payload = {
         name: testData.name,
         subject: testData.subjectId,
-        topics: testData.topicIds?.map((t: Option) => t.value) || [],
-        sub_topics: testData.subTopicIds?.map((t: Option) => t.value) || [],
+        topics: testData.topicIds?.map((t: Option) => t.value).filter(Boolean) || [],
+        sub_topics: testData.subTopicIds?.map((t: Option) => t.value).filter(Boolean) || [],
         total_time: testData.duration,
         total_questions: testData.numQuestions,
         total_marks: testData.totalMarks,
@@ -309,9 +327,10 @@ export const UnifiedTestEditor = () => {
 
       if (!testId) throw new Error("Failed to extract Test ID");
 
-      const validQuestions = currentQuestions
-        .filter(q => q !== null && q.stem && q.stem.trim() !== '')
-        .map(q => {
+      const validQuestions = [];
+      for (let i = 0; i < currentQuestions.length; i++) {
+        const q = currentQuestions[i];
+        if (q !== null && q.stem && q.stem.trim() !== '') {
            const clean = { ...q } as any;
            if (!clean.topicId) delete clean.topicId;
            if (!clean.subTopicId) delete clean.subTopicId;
@@ -319,8 +338,22 @@ export const UnifiedTestEditor = () => {
            if (clean.options) {
              clean.options = clean.options.filter((o: any) => o.text && o.text.trim() !== '');
            }
-           return clean;
-        });
+           
+           // Strict validations
+           if (!clean.options || clean.options.length < 2) {
+             throw new Error(`Question ${i + 1} requires at least 2 non-empty options.`);
+           }
+           if (!clean.correctOptionId) {
+             throw new Error(`Question ${i + 1} is missing a Correct Answer selection.`);
+           }
+           const hasCorrect = clean.options.some((o: any) => o.id === clean.correctOptionId);
+           if (!hasCorrect) {
+             throw new Error(`Question ${i + 1}'s Correct Answer is pointing to an empty or deleted option.`);
+           }
+
+           validQuestions.push(clean);
+        }
+      }
         
       if (validQuestions.length > 0) {
         await api.post('/questions/bulk', {
@@ -338,7 +371,8 @@ export const UnifiedTestEditor = () => {
       return testId;
     } catch (error: any) {
       console.error("Error saving all", error);
-      toast.error(error.response?.data?.message || "Failed to save changes.");
+      toast.error(error.message || error.response?.data?.message || "Failed to save changes.");
+      return null;
     } finally {
       setIsSaving(false);
     }
