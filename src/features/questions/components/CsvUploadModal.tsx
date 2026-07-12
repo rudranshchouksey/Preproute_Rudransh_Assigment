@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { Upload, X, FileSpreadsheet, AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Upload, X, FileSpreadsheet, AlertCircle, CheckCircle2, ChevronDown, ChevronUp, Loader2, Download } from 'lucide-react';
 import { Button } from '../../../components/ui/Button';
 import { Card } from '../../../components/ui/Card';
 import { Badge } from '../../../components/ui/Badge';
@@ -363,7 +363,21 @@ export const CsvUploadModal = ({ isOpen, onClose, onImport, existingCount, maxQu
 
               {/* CSV Format Guide */}
               <Card className="p-5">
-                <h4 className="text-sm font-semibold text-gray-900 mb-3">Expected CSV Format</h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-semibold text-gray-900">Expected CSV Format</h4>
+                  <Button variant="outline" size="sm" onClick={() => {
+                    const sample = 'question,option_a,option_b,option_c,option_d,correct_answer,difficulty,explanation\n"What is 2+2?","3","4","5","6","B","easy","2+2=4"';
+                    const blob = new Blob([sample], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'sample_questions.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  }}>
+                    <Download size={14} className="mr-1.5" /> Download Sample
+                  </Button>
+                </div>
                 <div className="overflow-x-auto">
                   <table className="text-xs w-full border-collapse">
                     <thead>
