@@ -38,21 +38,66 @@ export const TestForm = () => {
       try {
         const subRes = await api.get('/subjects').catch(() => ({ data: [] }));
         const subData = Array.isArray(subRes.data) ? subRes.data : subRes.data.data || [];
-        setSubjects(subData.map((s: any) => ({ value: s.id || s._id, label: s.name })));
+        const subjectOptions = subData.map((s: any) => ({ value: s.id || s._id, label: s.name }));
+        setSubjects(subjectOptions);
 
         if (isEditMode) {
           const testRes = await api.get(`/tests/${id}`).catch(() => null);
           if (testRes && testRes.data) {
             const data = testRes.data.data || testRes.data;
+
             setValue('name', data.name);
-            setValue('subjectId', data.subjectId);
-            setValue('duration', data.duration);
-            setValue('numQuestions', data.numQuestions);
-            setValue('totalMarks', data.totalMarks);
+
+            // Backend returns subject as a NAME string. Reverse-resolve to UUID.
+            const subjectUuid = subjectOptions.find((s: Option) =>
+              s.label === data.subject || s.value === data.subject
+            )?.value || data.subject || '';
+            setValue('subjectId', subjectUuid);
+
+            // Backend field names → Frontend form field names
+            setValue('duration', data.total_time ?? data.duration);
+            setValue('numQuestions', data.total_questions ?? data.numQuestions);
+            setValue('totalMarks', data.total_marks ?? data.totalMarks);
             setValue('difficulty', data.difficulty);
-            setValue('markingCorrect', data.markingScheme?.correct || 5);
-            setValue('markingWrong', data.markingScheme?.wrong || -1);
-            setValue('markingUnattempted', data.markingScheme?.unattempted || 0);
+            setValue('markingCorrect', data.correct_marks ?? data.markingScheme?.correct ?? 5);
+            setValue('markingWrong', data.wrong_marks ?? data.markingScheme?.wrong ?? -1);
+            setValue('markingUnattempted', data.unattempt_marks ?? data.markingScheme?.unattempted ?? 0);
+
+            // Reverse-resolve topics (names → Option[]{value: UUID, label: name})
+            if (subjectUuid) {
+              try {
+                const topicRes = await api.get(`/topics/subject/${subjectUuid}`).catch(() => ({ data: [] }));
+                const topicData = Array.isArray(topicRes.data) ? topicRes.data : topicRes.data.data || [];
+                const topicOptions = topicData.map((t: any) => ({ value: t.id || t._id, label: t.name }));
+                setTopics(topicOptions);
+
+                if (data.topics && Array.isArray(data.topics) && data.topics.length > 0) {
+                  const resolvedTopics = data.topics
+                    .map((name: string) => topicOptions.find((t: Option) => t.label === name || t.value === name))
+                    .filter(Boolean);
+                  setValue('topicIds', resolvedTopics);
+
+                  // Reverse-resolve sub_topics
+                  if (resolvedTopics.length > 0) {
+                    try {
+                      const stRes = await api.post('/sub-topics/multi-topics', {
+                        topicIds: resolvedTopics.map((t: Option) => t.value)
+                      }).catch(() => ({ data: [] }));
+                      const stData = Array.isArray(stRes.data) ? stRes.data : stRes.data.data || [];
+                      const stOptions = stData.map((st: any) => ({ value: st.id || st._id, label: st.name }));
+                      setSubTopics(stOptions);
+
+                      if (data.sub_topics && Array.isArray(data.sub_topics) && data.sub_topics.length > 0) {
+                        const resolvedSubTopics = data.sub_topics
+                          .map((name: string) => stOptions.find((st: Option) => st.label === name || st.value === name))
+                          .filter(Boolean);
+                        setValue('subTopicIds', resolvedSubTopics);
+                      }
+                    } catch { /* sub-topics resolution failed */ }
+                  }
+                }
+              } catch { /* topics resolution failed */ }
+            }
           }
         }
       } catch (error) {

@@ -33,16 +33,32 @@ export const QuestionEditorPage = () => {
       const res = await api.get(`/tests/${id}`);
       const data = res.data.data || res.data;
       setTestName(data.name || `Test ${id}`);
-      if (data.subject) setTestSubjectId(data.subject);
-      
-      const total = data.numQuestions || 10;
-      setNumQuestions(total);
-      
-      if (data.questionIds && data.questionIds.length > 0) {
+
+      // Backend returns subject as a NAME (e.g. "Psychology").
+      // We need the UUID for the bulk question submit. Reverse-resolve it.
+      if (data.subject) {
+        // Try fetching subjects list to resolve the name to a UUID
         try {
-          const qRes = await api.post('/questions/fetchBulk', { question_ids: data.questionIds });
+          const subRes = await api.get('/subjects').catch(() => ({ data: [] }));
+          const subData = Array.isArray(subRes.data) ? subRes.data : subRes.data.data || [];
+          const match = subData.find((s: any) => s.name === data.subject || s.id === data.subject);
+          setTestSubjectId(match?.id || match?._id || data.subject);
+        } catch {
+          setTestSubjectId(data.subject);
+        }
+      }
+
+      // Backend field: total_questions (not numQuestions)
+      const total = data.total_questions ?? data.numQuestions ?? 10;
+      setNumQuestions(total);
+
+      // Backend field: questions (array of UUIDs), not questionIds
+      const questionIds = data.questions || data.questionIds || [];
+      if (questionIds.length > 0) {
+        try {
+          const qRes = await api.post('/questions/fetchBulk', { question_ids: questionIds });
           const fetchedQuestions = Array.isArray(qRes.data) ? qRes.data : qRes.data.data || [];
-          
+
           const mappedQuestions = fetchedQuestions.map((q: any) => mapApiToDraft(q));
           const filledQuestions = [...mappedQuestions];
           // Pad with nulls up to total

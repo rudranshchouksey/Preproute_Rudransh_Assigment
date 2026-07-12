@@ -60,28 +60,84 @@ export const UnifiedTestEditor = () => {
     try {
       const subRes = await api.get('/subjects').catch(() => ({ data: [] }));
       const subData = Array.isArray(subRes.data) ? subRes.data : subRes.data.data || [];
-      setSubjects(subData.map((s: any) => ({ value: s.id || s._id, label: s.name })));
+      const subjectOptions = subData.map((s: any) => ({ value: s.id || s._id, label: s.name }));
+      setSubjects(subjectOptions);
 
       if (isEditMode) {
         const testRes = await api.get(`/tests/${id}`);
         const data = testRes.data.data || testRes.data;
 
+        // ── Map backend field names to frontend form field names ──
         setTestValue('name', data.name);
-        setTestValue('subjectId', data.subjectId);
-        setTestValue('duration', data.duration);
-        setTestValue('numQuestions', data.numQuestions || 10);
-        setTestValue('totalMarks', data.totalMarks);
+
+        // Backend returns subject as a NAME string (e.g. "Psychology").
+        // Frontend form needs the UUID. Reverse-resolve from loaded subjects list.
+        const subjectUuid = subjectOptions.find((s: Option) =>
+          s.label === data.subject || s.value === data.subject
+        )?.value || data.subject || '';
+        setTestValue('subjectId', subjectUuid);
+
+        // Backend field: total_time → Frontend field: duration
+        setTestValue('duration', data.total_time ?? data.duration);
+        // Backend field: total_questions → Frontend field: numQuestions
+        setTestValue('numQuestions', data.total_questions ?? data.numQuestions ?? 10);
+        // Backend field: total_marks → Frontend field: totalMarks
+        setTestValue('totalMarks', data.total_marks ?? data.totalMarks);
+
         setTestValue('difficulty', data.difficulty);
-        setTestValue('markingCorrect', data.markingScheme?.correct || 5);
-        setTestValue('markingWrong', data.markingScheme?.wrong || -1);
-        setTestValue('markingUnattempted', data.markingScheme?.unattempted || 0);
+
+        // Backend fields: correct_marks, wrong_marks, unattempt_marks
+        // Frontend fields: markingCorrect, markingWrong, markingUnattempted
+        setTestValue('markingCorrect', data.correct_marks ?? data.markingScheme?.correct ?? 5);
+        setTestValue('markingWrong', data.wrong_marks ?? data.markingScheme?.wrong ?? -1);
+        setTestValue('markingUnattempted', data.unattempt_marks ?? data.markingScheme?.unattempted ?? 0);
+
         if (data.type) setTestType(data.type);
 
-        // Fetch Questions
-        const total = data.numQuestions || 10;
-        if (data.questionIds && data.questionIds.length > 0) {
+        // ── Reverse-resolve topics (names → UUIDs) ──
+        // The backend returns topics as an array of name strings, e.g. ["Human Development"].
+        // We need to fetch the topic list for this subject, then resolve names to {value: UUID, label: name}.
+        if (subjectUuid) {
           try {
-            const qRes = await api.post('/questions/fetchBulk', { question_ids: data.questionIds });
+            const topicRes = await api.get(`/topics/subject/${subjectUuid}`).catch(() => ({ data: [] }));
+            const topicData = Array.isArray(topicRes.data) ? topicRes.data : topicRes.data.data || [];
+            const topicOptions = topicData.map((t: any) => ({ value: t.id || t._id, label: t.name }));
+            setTopics(topicOptions);
+
+            if (data.topics && Array.isArray(data.topics) && data.topics.length > 0) {
+              const resolvedTopics = data.topics
+                .map((name: string) => topicOptions.find((t: Option) => t.label === name || t.value === name))
+                .filter(Boolean);
+              setTestValue('topicIds', resolvedTopics);
+
+              // ── Reverse-resolve sub_topics (names → UUIDs) ──
+              if (resolvedTopics.length > 0) {
+                try {
+                  const stRes = await api.post('/sub-topics/multi-topics', {
+                    topicIds: resolvedTopics.map((t: Option) => t.value)
+                  }).catch(() => ({ data: [] }));
+                  const stData = Array.isArray(stRes.data) ? stRes.data : stRes.data.data || [];
+                  const stOptions = stData.map((st: any) => ({ value: st.id || st._id, label: st.name }));
+                  setSubTopics(stOptions);
+
+                  if (data.sub_topics && Array.isArray(data.sub_topics) && data.sub_topics.length > 0) {
+                    const resolvedSubTopics = data.sub_topics
+                      .map((name: string) => stOptions.find((st: Option) => st.label === name || st.value === name))
+                      .filter(Boolean);
+                    setTestValue('subTopicIds', resolvedSubTopics);
+                  }
+                } catch { /* sub-topics resolution failed, non-critical */ }
+              }
+            }
+          } catch { /* topics resolution failed, non-critical */ }
+        }
+
+        // ── Fetch Questions ──
+        const total = data.total_questions ?? data.numQuestions ?? 10;
+        const questionIds = data.questions || data.questionIds || [];
+        if (questionIds.length > 0) {
+          try {
+            const qRes = await api.post('/questions/fetchBulk', { question_ids: questionIds });
             const fetchedQuestions = Array.isArray(qRes.data) ? qRes.data : qRes.data.data || [];
             const mappedQuestions = fetchedQuestions.map((q: any) => mapApiToDraft(q));
             const filledQuestions = [...mappedQuestions];
@@ -168,6 +224,12 @@ export const UnifiedTestEditor = () => {
 
         await api.put(`/tests/${id}`, payload);
 
+        // Read current form values from react-hook-form (not from testData which is unavailable here)
+        const currentSubjectId = watchTest('subjectId');
+        const currentTopicIds = watchTest('topicIds') as Option[] | undefined;
+        const currentSubTopicIds = watchTest('subTopicIds') as Option[] | undefined;
+        const currentDifficulty = watchTest('difficulty');
+
         const validQuestions = [];
         for (let i = 0; i < currentQuestions.length; i++) {
           const q = currentQuestions[i];
@@ -187,10 +249,10 @@ export const UnifiedTestEditor = () => {
              if (!hasCorrect) continue;
 
              const apiPayload = mapDraftToApi(clean, {
-               subject: testData.subjectId,
-               topic: clean.topicId || (testData.topicIds && testData.topicIds[0]?.value) || undefined,
-               sub_topic: clean.subTopicId || (testData.subTopicIds && testData.subTopicIds[0]?.value) || undefined,
-               difficulty: clean.difficulty || testData.difficulty || 'medium',
+               subject: currentSubjectId,
+               topic: clean.topicId || (currentTopicIds && currentTopicIds[0]?.value) || undefined,
+               sub_topic: clean.subTopicId || (currentSubTopicIds && currentSubTopicIds[0]?.value) || undefined,
+               difficulty: clean.difficulty || currentDifficulty || 'medium',
              });
              validQuestions.push(apiPayload);
           }
@@ -210,7 +272,7 @@ export const UnifiedTestEditor = () => {
         isAutoSavingRef.current = false;
       }
     }, 5000); // 5s debounce for auto-save
-  }, [isEditMode, isSaving, questions, activeIndex, id, currentStep]);
+  }, [isEditMode, isSaving, questions, activeIndex, id, currentStep, watchTest]);
 
   useEffect(() => {
     if (isEditMode) triggerAutoSave();
