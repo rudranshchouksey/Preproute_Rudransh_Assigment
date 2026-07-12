@@ -1,6 +1,5 @@
 import type { UseFormRegister, FieldErrors, UseFormWatch } from 'react-hook-form';
 import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/Label';
 
 interface SchedulingControlsProps {
   register: UseFormRegister<any>;
@@ -10,73 +9,134 @@ interface SchedulingControlsProps {
 
 export const SchedulingControls = ({ register, watch, errors }: SchedulingControlsProps) => {
   const publishMode = watch('publishMode', 'now');
+  const liveUntil = watch('liveUntil', 'always');
 
   const durationOptions = [
     { value: 'always', label: 'Always Available' },
     { value: '1week', label: '1 Week' },
     { value: '2weeks', label: '2 Weeks' },
-    { value: '3weeks', label: '3 Weeks' },
     { value: '1month', label: '1 Month' },
-    { value: 'custom', label: 'Custom Duration' }
+    { value: 'custom', label: 'Custom' }
   ];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Label className="mb-3">Publish Timing</Label>
-        <div className="flex p-1 bg-gray-100 rounded-lg">
-          <label className={`flex-1 text-center py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
-            publishMode === 'now' ? 'bg-white shadow-sm text-brand' : 'text-gray-500 hover:text-gray-900'
-          }`}>
-            <input type="radio" value="now" {...register('publishMode')} className="hidden" />
-            Publish Now
-          </label>
-          <label className={`flex-1 text-center py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
-            publishMode === 'schedule' ? 'bg-white shadow-sm text-brand' : 'text-gray-500 hover:text-gray-900'
-          }`}>
-            <input type="radio" value="schedule" {...register('publishMode')} className="hidden" />
-            Schedule Publish
-          </label>
-        </div>
-      </div>
-
-      {publishMode === 'schedule' && (
-        <div className="grid grid-cols-2 gap-4 pt-2 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div>
-            <Label className="text-xs text-gray-500 uppercase tracking-wider mb-2">Select Date</Label>
-            <Input 
-              type="date" 
-              {...register('scheduleDate', { required: publishMode === 'schedule' })} 
-              error={errors.scheduleDate ? "Required" : undefined}
-            />
-          </div>
-          <div>
-            <Label className="text-xs text-gray-500 uppercase tracking-wider mb-2">Select Time</Label>
-            <Input 
-              type="time" 
-              {...register('scheduleTime', { required: publishMode === 'schedule' })} 
-              error={errors.scheduleTime ? "Required" : undefined}
-            />
-          </div>
-        </div>
-      )}
-
-      <div className="pt-4 border-t border-gray-100">
-        <Label className="mb-3">Live Until (Duration limit)</Label>
-        <div className="grid grid-cols-2 gap-3">
+    <div className="flex flex-col gap-[30px] w-[1160px]">
+      
+      {/* Live Until Section */}
+      <div className="flex flex-col gap-[15px]">
+        <h3 className="text-[#374151] font-bold text-[16px]">Live Until</h3>
+        <p className="text-[#6B7180] font-medium text-[16px]">Choose how long this test should remain available on the platform.</p>
+        
+        <div className="grid grid-cols-2 gap-[10px]">
           {durationOptions.map((opt) => (
-            <label key={opt.value} className="flex items-center space-x-2 cursor-pointer group">
-              <input
-                type="radio"
-                value={opt.value}
-                {...register("liveUntil")}
-                className="text-brand focus:ring-brand h-4 w-4 border-gray-300"
-              />
-              <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">{opt.label}</span>
+            <label 
+              key={opt.value} 
+              className={`flex items-center w-[575px] h-[48px] px-5 gap-[15px] cursor-pointer bg-white border ${
+                liveUntil === opt.value ? 'border-[#7489FF]' : 'border-transparent'
+              } transition-colors`}
+            >
+              <div className="w-6 h-6 rounded-full border flex items-center justify-center shrink-0">
+                 {liveUntil === opt.value ? (
+                   <div className="w-4 h-4 rounded-full bg-[#7489FF]"></div>
+                 ) : (
+                   <div className="w-4 h-4 rounded-full bg-[#D9D9D9]"></div>
+                 )}
+              </div>
+              
+              <div className="flex items-center gap-2">
+                 <div className="flex items-center justify-center bg-[#A8CDFC] rounded-full w-6 h-6">
+                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="white"/>
+                   </svg>
+                 </div>
+                 <span className="text-[#374151] text-[14px]">{opt.label}</span>
+              </div>
+              <input type="radio" value={opt.value} {...register("liveUntil")} className="hidden" />
             </label>
           ))}
         </div>
       </div>
+
+      {/* Schedule Publish Section */}
+      <div className="flex flex-col gap-[15px]">
+        <h3 className="text-[#374151] font-bold text-[16px]">Schedule Publish</h3>
+        <p className="text-[#6B7180] font-medium text-[16px]">Select the date and time when the test should go live.</p>
+        
+        <div className="grid grid-cols-2 gap-[10px]">
+          {/* Publish Now */}
+          <label 
+            className={`flex items-center w-[575px] h-[48px] px-5 gap-[15px] cursor-pointer bg-white border ${
+              publishMode === 'now' ? 'border-[#7489FF]' : 'border-transparent'
+            } transition-colors`}
+          >
+            <div className="w-6 h-6 rounded-full border flex items-center justify-center shrink-0">
+               {publishMode === 'now' ? (
+                 <div className="w-4 h-4 rounded-full bg-[#7489FF]"></div>
+               ) : (
+                 <div className="w-4 h-4 rounded-full bg-[#D9D9D9]"></div>
+               )}
+            </div>
+            <div className="flex items-center gap-2">
+                 <div className="flex items-center justify-center bg-[#A8CDFC] rounded-full w-6 h-6">
+                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="white"/>
+                   </svg>
+                 </div>
+                 <span className="text-[#374151] text-[14px]">Publish Now</span>
+            </div>
+            <input type="radio" value="now" {...register('publishMode')} className="hidden" />
+          </label>
+
+          {/* Schedule Publish */}
+          <label 
+            className={`flex items-center w-[575px] h-[48px] px-5 gap-[15px] cursor-pointer bg-white border ${
+              publishMode === 'schedule' ? 'border-[#7489FF]' : 'border-transparent'
+            } transition-colors`}
+          >
+            <div className="w-6 h-6 rounded-full border flex items-center justify-center shrink-0">
+               {publishMode === 'schedule' ? (
+                 <div className="w-4 h-4 rounded-full bg-[#7489FF]"></div>
+               ) : (
+                 <div className="w-4 h-4 rounded-full bg-[#D9D9D9]"></div>
+               )}
+            </div>
+            <div className="flex items-center gap-2">
+                 <div className="flex items-center justify-center bg-[#A8CDFC] rounded-full w-6 h-6">
+                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="white"/>
+                   </svg>
+                 </div>
+                 <span className="text-[#374151] text-[14px]">Schedule Publish</span>
+            </div>
+            <input type="radio" value="schedule" {...register('publishMode')} className="hidden" />
+          </label>
+        </div>
+
+        {/* Custom Date/Time pickers */}
+        {publishMode === 'schedule' && (
+          <div className="grid grid-cols-2 gap-[10px] mt-4 w-[1160px]">
+            <div>
+              <p className="text-[#6B7180] text-[12px] mb-2 font-medium">Schedule Date</p>
+              <Input 
+                type="date" 
+                {...register('scheduleDate', { required: publishMode === 'schedule' })} 
+                error={errors.scheduleDate ? "Required" : undefined}
+                className="w-[575px]"
+              />
+            </div>
+            <div>
+              <p className="text-[#6B7180] text-[12px] mb-2 font-medium">Schedule Time</p>
+              <Input 
+                type="time" 
+                {...register('scheduleTime', { required: publishMode === 'schedule' })} 
+                error={errors.scheduleTime ? "Required" : undefined}
+                className="w-[575px]"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 };
