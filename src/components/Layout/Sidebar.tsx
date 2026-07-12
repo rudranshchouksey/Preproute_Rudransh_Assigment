@@ -16,7 +16,7 @@ export const Sidebar = () => {
   return (
     <>
       {/* Mobile Toggle */}
-      <button 
+      <button
         className="lg:hidden fixed top-4 left-4 z-40 p-2 bg-white rounded-md shadow-sm border border-gray-200 text-gray-600"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
@@ -26,7 +26,7 @@ export const Sidebar = () => {
       {/* Backdrop */}
       <AnimatePresence>
         {isMobileOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -43,7 +43,7 @@ export const Sidebar = () => {
         <div className="h-16 flex items-center px-6 border-b border-gray-200 shrink-0">
           <h1 className="text-2xl font-bold text-brand">Preproute</h1>
         </div>
-        
+
         <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto no-scrollbar">
           {navItems.map((item) => (
             <NavLink
@@ -66,7 +66,7 @@ export const Sidebar = () => {
             </NavLink>
           ))}
         </nav>
-        
+
         <div className="p-4 border-t border-gray-100 shrink-0">
           <div className="px-4 py-3 bg-gray-50 rounded-xl text-center">
             <p className="text-xs font-semibold text-gray-900">Preproute Admin</p>

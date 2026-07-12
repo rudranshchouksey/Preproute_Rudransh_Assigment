@@ -108,14 +108,19 @@ export const TestTable = ({ tests, isLoading, onDelete, onDuplicate, sortField, 
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div className="flex justify-end space-x-1">
-                      <Link to={`/test/${testId}/publish`}>
-                        <Button variant="ghost" size="icon" className="text-gray-500 hover:text-brand" title="View">
+                      <Link to={`/test/${testId}/preview`}>
+                        <Button variant="ghost" size="icon" className="text-gray-500 hover:text-brand" title="Preview">
                           <Eye size={18} />
                         </Button>
                       </Link>
                       <Link to={`/test/edit/${testId}`}>
                         <Button variant="ghost" size="icon" className="text-gray-500 hover:text-amber-500" title="Edit">
                           <Edit3 size={18} />
+                        </Button>
+                      </Link>
+                      <Link to={`/test/${testId}/publish`}>
+                        <Button variant="ghost" size="icon" className="text-gray-500 hover:text-green-500" title="Publish">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-send"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                         </Button>
                       </Link>
                       <Button 

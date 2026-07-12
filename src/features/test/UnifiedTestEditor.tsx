@@ -35,7 +35,7 @@ export const UnifiedTestEditor = () => {
   const selectedTopics = watchTest('topicIds') as Option[] | undefined;
 
   // Question Editor State
-  const [questions, setQuestions] = useState<QuestionDraft[]>([]);
+  const [questions, setQuestions] = useState<(QuestionDraft | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const questionFormRef = useRef<QuestionFormRef>(null);
 
@@ -64,7 +64,7 @@ export const UnifiedTestEditor = () => {
       if (isEditMode) {
         const testRes = await api.get(`/tests/${id}`);
         const data = testRes.data.data || testRes.data;
-        
+
         setTestValue('name', data.name);
         setTestValue('subjectId', data.subjectId);
         setTestValue('duration', data.duration);
@@ -149,27 +149,27 @@ export const UnifiedTestEditor = () => {
   const triggerAutoSave = useCallback(() => {
     if (!isEditMode || isSaving) return;
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
-    
+
     autoSaveTimerRef.current = setTimeout(async () => {
       try {
         let currentQuestions = [...questions];
         if (questionFormRef.current) {
           currentQuestions[activeIndex] = questionFormRef.current.getCurrentData();
         }
-        
+
         const payload = {
           status: 'draft',
         };
-        
+
         await api.put(`/tests/${id}`, payload);
-        
+
         if (currentQuestions.some(q => q !== null)) {
           await api.post('/questions/bulk', {
             testId: id,
             questions: currentQuestions
           });
         }
-        
+
       } catch (err) {
         // Silent fail for auto-save
         console.warn('Auto-save failed', err);
@@ -204,8 +204,8 @@ export const UnifiedTestEditor = () => {
       const nextEmpty = questions.findIndex((q, idx) => idx > activeIndex && q === null);
       if (nextEmpty !== -1) {
         const updated = [...questions];
-        updated[activeIndex] = currentData; 
-        updated[nextEmpty] = { ...currentData }; 
+        updated[activeIndex] = currentData;
+        updated[nextEmpty] = { ...currentData };
         setQuestions(updated);
         setActiveIndex(nextEmpty);
         toast.success(`Question duplicated to slot ${nextEmpty + 1}`);
@@ -243,20 +243,21 @@ export const UnifiedTestEditor = () => {
       // Navigate to step 2 but save basic info if we want
       const numQ = testData.numQuestions || 10;
       if (questions.length !== numQ) {
-         setQuestions(prev => {
-            const updated = [...prev];
-            if (updated.length < numQ) {
-                while(updated.length < numQ) updated.push(null);
-            } else if (updated.length > numQ) {
-                updated.length = numQ;
-            }
-            return updated;
-         });
+        setQuestions(prev => {
+          const updated = [...prev];
+          if (updated.length < numQ) {
+            while (updated.length < numQ) updated.push(null);
+          } else if (updated.length > numQ) {
+            updated.length = numQ;
+          }
+          return updated;
+        });
       }
       setCurrentStep(2);
     } else {
       // From Step 2, "Next" takes us to Publish
-      await handleSaveAll(testData, 'save');
+      const testId = await handleSaveAll(testData, 'save');
+      if (testId) navigate(`/test/${testId}/publish`);
     }
   };
 
@@ -279,7 +280,7 @@ export const UnifiedTestEditor = () => {
         total_marks: testData.totalMarks,
         difficulty: testData.difficulty === 'difficult' ? 'hard' : (testData.difficulty || 'medium').toLowerCase(),
         status: mode === 'draft' ? 'draft' : 'draft', // Live is set in publish page
-        type: testType, 
+        type: testType,
         correct_marks: testData.markingCorrect,
         wrong_marks: testData.markingWrong,
         unattempt_marks: testData.markingUnattempted
@@ -301,12 +302,14 @@ export const UnifiedTestEditor = () => {
           questions: currentQuestions
         });
       }
-      
+
       if (mode === 'save') {
-        navigate(`/test/${testId}/publish`);
+        // Will navigate in the caller
       } else {
         toast.success('Draft saved successfully!');
       }
+      
+      return testId;
     } catch (error: any) {
       console.error("Error saving all", error);
       toast.error(error.response?.data?.message || "Failed to save changes.");
@@ -322,7 +325,7 @@ export const UnifiedTestEditor = () => {
         <div className="bg-red-50 border border-red-200 text-red-700 p-8 rounded-xl flex flex-col items-center mt-12 mx-auto max-w-2xl">
           <AlertCircle size={40} className="text-red-500 mb-4" />
           <p className="font-medium text-lg mb-4">{fetchError}</p>
-          <Button onClick={fetchInitialData}><RefreshCw size={16} className="mr-2"/> Retry</Button>
+          <Button onClick={fetchInitialData}><RefreshCw size={16} className="mr-2" /> Retry</Button>
         </div>
       </div>
     );
@@ -339,7 +342,7 @@ export const UnifiedTestEditor = () => {
 
   const testName = watchTest('name') || 'Untitled Test';
   const numQuestions = watchTest('numQuestions') || 10;
-  
+
   // Figma Layout logic for Test Creation Modal
 
   return (
@@ -352,7 +355,7 @@ export const UnifiedTestEditor = () => {
           </div>
           <button type="button" onClick={() => navigate('/')} className="w-[24px] h-[24px] flex items-center justify-center shrink-0 cursor-pointer hover:bg-gray-100 rounded-full transition-colors">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="#111827"/>
+              <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="#111827" />
             </svg>
           </button>
         </div>
@@ -364,20 +367,20 @@ export const UnifiedTestEditor = () => {
             <div className="flex items-center gap-[20px] h-[52px]">
               <div className="w-[48px] h-[48px] bg-white border border-[#D1D5DB] rounded-[24px] flex items-center justify-center shrink-0">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.89 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="#111827"/>
-                  <circle cx="16.5" cy="7.5" r="4.5" fill="#0C9D61" stroke="white" strokeWidth="1.5"/>
+                  <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.89 22 12 22ZM18 16V11C18 7.93 16.36 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.63 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16ZM16 17H8V11C8 8.52 9.51 6.5 12 6.5C14.49 6.5 16 8.52 16 11V17Z" fill="#111827" />
+                  <circle cx="16.5" cy="7.5" r="4.5" fill="#0C9D61" stroke="white" strokeWidth="1.5" />
                 </svg>
               </div>
               <div className="flex items-center gap-[9px] h-[52px]">
                 <div className="w-[48px] h-[48px] bg-[#FFD284] border border-[#6366F1] rounded-full overflow-hidden shrink-0 flex items-center justify-center">
-                   <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Avatar" className="w-full h-full object-cover" />
+                  <img src="https://i.pravatar.cc/150?u=a042581f4e29026024d" alt="Avatar" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex flex-col gap-[4px] w-[115px] justify-center">
                   <span className="text-[20px] font-semibold text-[#374151] leading-[150%] h-[30px] flex items-center">Alex Wando</span>
                   <span className="text-[12px] font-normal text-[#374151] leading-[150%] h-[18px]">Admin</span>
                 </div>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 10L12 15L17 10H7Z" fill="#374151"/>
+                  <path d="M7 10L12 15L17 10H7Z" fill="#374151" />
                 </svg>
               </div>
             </div>
@@ -389,9 +392,9 @@ export const UnifiedTestEditor = () => {
               <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
               <span className="text-[16px] font-normal text-black/60 leading-[19px]">{isEditMode ? 'Edit Test' : 'Create Test'}</span>
               <span className="text-[16px] font-normal text-black/60 leading-[150%] mx-[4px]">/</span>
-              <span className="text-[16px] font-normal text-black/60 leading-[19px]">{typeLabel}</span>
+              <span className="text-[16px] font-normal text-black/60 leading-[19px]">{watchTest('testType') || 'Assessment'}</span>
             </div>
-            <button type="button" onClick={handleTestSubmit((d) => handleSaveAll(d, 'save'))} disabled={isSaving} className="w-[160px] h-[48px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
+            <button type="button" onClick={handleTestSubmit(async (d) => { const tid = await handleSaveAll(d, 'save'); if(tid) navigate(`/test/${tid}/publish`); })} disabled={isSaving} className="w-[160px] h-[48px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
               <span className="text-[16px] font-medium text-[#FAFAFA] leading-[150%]">{isSaving ? 'Publishing...' : 'Publish'}</span>
             </button>
           </div>
@@ -402,28 +405,26 @@ export const UnifiedTestEditor = () => {
         {currentStep === 1 ? (
           /* STEP 1: Basic Info Form matching Figma exactly */
           <div className="w-[1152px] bg-white rounded-[12px] flex flex-col gap-[50px]">
-            
+
             {/* Test Type Tabs */}
             <div className="w-[1152px] flex items-center justify-between">
               <div className="w-[329px] h-[50px] bg-white border-[0.5px] border-[#D1D5DB] rounded-[12px] flex items-center px-[10px] py-[2px] gap-[30px] box-border">
                 {[
-                  { id: 'chapterwise', label: 'Chapterwise', w: 'w-[107px]' }, 
-                  { id: 'pyq', label: 'PYQ', w: 'w-[51px]' }, 
+                  { id: 'chapterwise', label: 'Chapterwise', w: 'w-[107px]' },
+                  { id: 'pyq', label: 'PYQ', w: 'w-[51px]' },
                   { id: 'mock', label: 'Mock Test', w: 'w-[91px]' }
                 ].map(t => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => setTestType(t.id as any)}
-                    className={`h-[40px] flex items-center justify-center px-[11px] py-[3px] box-border transition-colors ${
-                      testType === t.id 
+                    className={`h-[40px] flex items-center justify-center px-[11px] py-[3px] box-border transition-colors ${testType === t.id
                         ? `bg-[#F8FAFF] rounded-[8px] ${t.w}`
                         : `rounded-[48px] ${t.w} hover:bg-gray-50`
-                    }`}
+                      }`}
                   >
-                    <span className={`text-[14px] leading-[150%] h-[21px] ${
-                      testType === t.id ? 'font-medium text-[#384EC7]' : 'font-normal text-[#9CA3AF]'
-                    }`}>
+                    <span className={`text-[14px] leading-[150%] h-[21px] ${testType === t.id ? 'font-medium text-[#384EC7]' : 'font-normal text-[#9CA3AF]'
+                      }`}>
                       {t.label}
                     </span>
                   </button>
@@ -432,7 +433,7 @@ export const UnifiedTestEditor = () => {
             </div>
 
             <form id="test-config-form" onSubmit={handleTestSubmit(handleNextStep)} className="flex flex-col gap-[50px]">
-              
+
               {/* Row 1 */}
               <div className="w-[1152px] h-[87px] flex items-start gap-[50px]">
                 <div className="w-[551px] flex flex-col gap-[15px]">
@@ -443,7 +444,7 @@ export const UnifiedTestEditor = () => {
                   </Select>
                   {testErrors.subjectId && <span className="text-red-500 text-xs">{(testErrors.subjectId as any).message}</span>}
                 </div>
-                
+
                 <div className="w-[551px] flex flex-col gap-[15px]">
                   <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Name of Test</label>
                   <input type="text" {...registerTest("name", { required: "Test name is required" })} placeholder="Enter name of Test" className="w-[551px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
@@ -456,7 +457,7 @@ export const UnifiedTestEditor = () => {
                 <div className="w-[551px] flex flex-col gap-[15px]">
                   <MultiSelect name="topicIds" control={control} options={topics} label="Topic" placeholder="Choose from Drop-down" isDisabled={!selectedSubject || topics.length === 0} />
                 </div>
-                
+
                 <div className="w-[551px] flex flex-col gap-[15px]">
                   <MultiSelect name="subTopicIds" control={control} options={subTopics} label="Sub Topic" placeholder="Choose from Drop-down" isDisabled={!selectedTopics || selectedTopics.length === 0 || subTopics.length === 0} />
                 </div>
@@ -469,7 +470,7 @@ export const UnifiedTestEditor = () => {
                   <input type="number" {...registerTest("duration", { required: "Duration is required", valueAsNumber: true })} placeholder="Enter the time" className="w-[551px] h-[48px] bg-white border-[0.5px] border-[#9CA3AF] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
                   {testErrors.duration && <span className="text-red-500 text-xs">{(testErrors.duration as any).message}</span>}
                 </div>
-                
+
                 <div className="w-[551px] flex flex-col gap-[30px]">
                   <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Test Difficulty Level</label>
                   <div className="w-[510px] h-[24px] flex items-center gap-[30px]">
@@ -487,7 +488,7 @@ export const UnifiedTestEditor = () => {
 
               {/* Row 4: Marking Scheme & Totals */}
               <div className="w-[1152px] h-[141px] flex items-start gap-[50px]">
-                
+
                 <div className="w-[551px] flex flex-col gap-[30px]">
                   <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Marking Scheme:</label>
                   <div className="w-[551px] h-[87px] flex items-center gap-[50px]">
@@ -540,20 +541,20 @@ export const UnifiedTestEditor = () => {
                 we might need to float this sidebar or render it outside. Given the constraints, 
                 let's render the main content and hide the sidebar if it breaks the 1200px width.
                 Actually, the image shows it taking the place of the main sidebar. We will render it absolute left. */}
-            
+
             <div className="absolute left-[44px] top-[92px] w-[196px] h-full bg-white border-r border-[#E5E7EB] shrink-0 pt-6">
               <h3 className="text-[#6B7180] font-medium text-[12px] px-4 mb-6 flex items-center justify-between uppercase">
                 Question creation
                 <ChevronRight size={14} className="text-gray-400 rotate-180" />
               </h3>
-              
+
               <div className="text-[#374151] font-semibold text-[14px] px-4 mb-6 pb-4 border-b border-[#E5E7EB]">
                 Total Questions . <span className="text-[#6B7180] font-normal">{numQuestions}</span>
               </div>
-              
+
               <div className="px-2">
-                <QuestionSidebar 
-                  questions={questions}
+                <QuestionSidebar
+                  questions={questions as QuestionDraft[]}
                   activeIndex={activeIndex}
                   numQuestions={numQuestions}
                   onSelect={handleSelectQuestion}
@@ -577,7 +578,7 @@ export const UnifiedTestEditor = () => {
                 }}
                 onClear={() => {
                   const updated = [...questions];
-                  updated[activeIndex] = null as any;
+                  updated[activeIndex] = null;
                   setQuestions(updated);
                 }}
                 onDuplicate={handleDuplicateQuestion}
@@ -586,12 +587,12 @@ export const UnifiedTestEditor = () => {
                 onOpenCsv={() => setIsCsvOpen(true)}
                 onNavigate={(index) => handleSelectQuestion(index - 1)}
                 testData={{
-                   subject: subjects.find(s => s.value === selectedSubject)?.label,
-                   topic: topics.find(t => selectedTopics?.find(st => st.value === t.value))?.label,
-                   subTopic: subTopics.find(t => t.label)?.label, // simplified for view
-                   duration: watchTest('duration'),
-                   totalMarks: watchTest('totalMarks'),
-                   difficulty: watchTest('difficulty')
+                  subject: subjects.find(s => s.value === selectedSubject)?.label,
+                  topic: topics.find(t => selectedTopics?.find(st => st.value === t.value))?.label,
+                  subTopic: subTopics.find(t => t.label)?.label, // simplified for view
+                  duration: watchTest('duration'),
+                  totalMarks: watchTest('totalMarks'),
+                  difficulty: watchTest('difficulty')
                 }}
               />
 
@@ -600,9 +601,14 @@ export const UnifiedTestEditor = () => {
                 <button type="button" onClick={() => setCurrentStep(1)} className="w-[172px] h-[48px] bg-[#FF7D7D] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-red-500 transition-colors">
                   <span className="text-[16px] font-medium text-white leading-[150%]">Exit Test Creation</span>
                 </button>
-                <button type="button" onClick={handleTestSubmit(handleNextStep)} className="w-[160px] h-[48px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
-                  <span className="text-[16px] font-medium text-[#FAFAFA] leading-[150%]">Next</span>
-                </button>
+                <div className="flex gap-4">
+                  <button type="button" onClick={handleTestSubmit(async (d) => { const tid = await handleSaveAll(d, 'draft'); if(tid) navigate(`/test/${tid}/preview`); })} className="w-[160px] h-[48px] bg-white border border-[#7489FF] text-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-50 transition-colors">
+                    <span className="text-[16px] font-medium leading-[150%]">Preview</span>
+                  </button>
+                  <button type="button" onClick={handleTestSubmit(handleNextStep)} className="w-[160px] h-[48px] bg-[#7489FF] rounded-[8px] flex items-center justify-center cursor-pointer hover:bg-blue-500 transition-colors">
+                    <span className="text-[16px] font-medium text-[#FAFAFA] leading-[150%]">Next</span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

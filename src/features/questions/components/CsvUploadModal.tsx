@@ -36,6 +36,7 @@ interface ColumnMapping {
   explanation: string;
   topic: string;
   subTopic: string;
+  mediaUrl: string;
 }
 
 const DEFAULT_MAPPING: ColumnMapping = {
@@ -49,6 +50,7 @@ const DEFAULT_MAPPING: ColumnMapping = {
   explanation: 'explanation',
   topic: 'topic',
   subTopic: 'sub_topic',
+  mediaUrl: 'media_url',
 };
 
 const MAPPING_LABELS: Record<keyof ColumnMapping, { label: string; required: boolean }> = {
@@ -62,6 +64,7 @@ const MAPPING_LABELS: Record<keyof ColumnMapping, { label: string; required: boo
   explanation: { label: 'Explanation', required: false },
   topic: { label: 'Topic', required: false },
   subTopic: { label: 'Sub Topic', required: false },
+  mediaUrl: { label: 'Image URL', required: false },
 };
 
 function parseCSV(text: string): { headers: string[]; rows: CsvRow[] } {
@@ -133,6 +136,7 @@ function mapRowToQuestion(row: CsvRow, mapping: ColumnMapping, rowIndex: number)
   const explanation = row[mapping.explanation] || '';
   const topic = row[mapping.topic] || '';
   const subTopic = row[mapping.subTopic] || '';
+  const mediaUrl = row[mapping.mediaUrl] || '';
 
   if (!stem) errors.push('Question text is empty');
   if (!optA) errors.push('Option A is empty');
@@ -157,7 +161,7 @@ function mapRowToQuestion(row: CsvRow, mapping: ColumnMapping, rowIndex: number)
       explanation,
       topicId: topic,
       subTopicId: subTopic,
-      mediaUrl: '',
+      mediaUrl: mediaUrl,
     },
     rowIndex: rowIndex + 2, // +2 for 1-indexed + header row
     errors,
@@ -223,6 +227,7 @@ export const CsvUploadModal = ({ isOpen, onClose, onImport, existingCount, maxQu
         explanation: ['explanation', 'explain', 'solution', 'rationale'],
         topic: ['topic', 'chapter', 'unit'],
         subTopic: ['sub_topic', 'subtopic', 'sub_chapter', 'section'],
+        mediaUrl: ['media_url', 'image', 'image_url', 'media'],
       };
 
       for (const [field, aliases] of Object.entries(commonMaps)) {
@@ -366,7 +371,7 @@ export const CsvUploadModal = ({ isOpen, onClose, onImport, existingCount, maxQu
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-semibold text-gray-900">Expected CSV Format</h4>
                   <Button variant="outline" size="sm" onClick={() => {
-                    const sample = 'question,option_a,option_b,option_c,option_d,correct_answer,difficulty,explanation\n"What is 2+2?","3","4","5","6","B","easy","2+2=4"';
+                    const sample = 'question,option_a,option_b,option_c,option_d,correct_answer,difficulty,explanation,media_url\n"Which of the following is NOT a fundamental state of matter?","Solid","Liquid","Gas","Energy","D","easy","Energy is a property of objects, not a state of matter like solid, liquid, gas, or plasma.",""\n"What is the chemical symbol for Gold?","Au","Ag","Fe","Gd","A","easy","Au comes from the Latin word aurum, meaning gold.",""\n"Identify the organelle known as the powerhouse of the cell.","Nucleus","Mitochondria","Ribosome","Endoplasmic Reticulum","B","medium","Mitochondria generate most of the cell\'s supply of adenosine triphosphate (ATP), used as a source of chemical energy.",""';
                     const blob = new Blob([sample], { type: 'text/csv' });
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
@@ -382,21 +387,22 @@ export const CsvUploadModal = ({ isOpen, onClose, onImport, existingCount, maxQu
                   <table className="text-xs w-full border-collapse">
                     <thead>
                       <tr className="bg-gray-50">
-                        {['question', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_answer', 'difficulty', 'explanation'].map(h => (
+                        {['question', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_answer', 'difficulty', 'explanation', 'media_url'].map(h => (
                           <th key={h} className="border border-gray-200 px-2 py-1.5 text-left font-semibold text-gray-600">{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">What is 2+2?</td>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">3</td>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">4</td>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">5</td>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">6</td>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">B</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">Which of the following is NOT...</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">Solid</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">Liquid</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">Gas</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">Energy</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">D</td>
                         <td className="border border-gray-200 px-2 py-1.5 text-gray-500">easy</td>
-                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">2+2=4</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500">Energy is a property...</td>
+                        <td className="border border-gray-200 px-2 py-1.5 text-gray-500"></td>
                       </tr>
                     </tbody>
                   </table>

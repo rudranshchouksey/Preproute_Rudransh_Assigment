@@ -6,6 +6,8 @@ import { MainLayout } from './components/Layout/MainLayout';
 import { UnifiedTestEditor } from './features/test/UnifiedTestEditor';
 import { TestPublishPage } from './features/publish/TestPublishPage';
 import { TestTrackingPage } from './features/tracking/TestTrackingPage';
+import { TestPreviewPage } from './features/preview/TestPreviewPage';
+import { TestViewPage } from './features/published/TestViewPage';
 import { ProtectedRoute } from './pages';
 
 function App() {
@@ -33,6 +35,8 @@ function App() {
               
               {/* TestPublishPage */}
               <Route path="/test/:id/publish" element={<TestPublishPage />} />
+              <Route path="/test/:id/preview" element={<TestPreviewPage />} />
+              <Route path="/test/:id/view" element={<TestViewPage />} />
               
               <Route path="/test/tracking" element={<TestTrackingPage />} />
             </Route>

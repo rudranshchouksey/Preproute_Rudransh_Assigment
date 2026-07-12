@@ -3,6 +3,7 @@ import { useForm, Controller } from 'react-hook-form';
 import type { QuestionDraft } from './types';
 import { OptionCard } from './components/OptionCard';
 import { RichTextEditor } from './components/RichTextEditor';
+import { ImageUpload } from './components/ImageUpload';
 import { Select } from '../../components/ui/Select';
 import { Label } from '../../components/ui/Label';
 import { Trash2, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
@@ -17,6 +18,7 @@ interface QuestionFormProps {
   numQuestions?: number;
   onOpenCsv?: () => void;
   onNavigate?: (index: number) => void;
+  onDuplicate?: () => void;
   testData?: {
     subject?: string;
     topic?: string;
@@ -221,6 +223,7 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
               rules={{ required: 'Question text is required' }}
               render={({ field }) => (
                 <RichTextEditor
+                  label="Question Text"
                   error={errors.stem?.message}
                   value={field.value}
                   onChange={field.onChange}
@@ -228,6 +231,20 @@ export const QuestionForm = forwardRef<QuestionFormRef, QuestionFormProps>(({
                 />
               )}
             />
+            
+            <div className="mt-4">
+              <Controller
+                name="mediaUrl"
+                control={control}
+                render={({ field }) => (
+                  <ImageUpload 
+                    label="Question Image (Optional)" 
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
 
             <div className="mt-8">
               <label className="block text-sm font-bold text-gray-900 mb-4">Type the options below</label>
