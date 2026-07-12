@@ -14,6 +14,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    // Log the payload exactly as the backend engineer requested
+    if (config.method?.toUpperCase() === 'PUT') {
+      console.log('PUT Payload', config.data);
+    } else if (config.method?.toUpperCase() === 'POST' && config.url?.includes('/bulk')) {
+      console.log('Bulk Payload', config.data);
+    }
+    
     return config;
   },
   (error) => {
@@ -48,7 +56,7 @@ api.interceptors.response.use(
         } 
         // If it's an array of errors (Zod / Express Validator)
         else if (Array.isArray(resData.errors)) {
-           error.message = resData.errors.map((e: any) => e.message || JSON.stringify(e)).join(', ');
+           error.message = resData.errors.map((e: any) => e.message || e.msg || JSON.stringify(e)).join(', ');
         }
       }
     }

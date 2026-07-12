@@ -15,6 +15,7 @@ import { QuestionForm, QuestionFormRef } from '../questions/QuestionForm';
 import { QuestionSidebar } from '../questions/components/QuestionSidebar';
 import { CsvUploadModal } from '../questions/components/CsvUploadModal';
 import type { QuestionDraft } from '../questions/types';
+import { mapApiToDraft, mapDraftToApi } from '../questions/utils';
 
 interface Option {
   value: string | number;
@@ -82,7 +83,8 @@ export const UnifiedTestEditor = () => {
           try {
             const qRes = await api.post('/questions/fetchBulk', { question_ids: data.questionIds });
             const fetchedQuestions = Array.isArray(qRes.data) ? qRes.data : qRes.data.data || [];
-            const filledQuestions = [...fetchedQuestions];
+            const mappedQuestions = fetchedQuestions.map((q: any) => mapApiToDraft(q));
+            const filledQuestions = [...mappedQuestions];
             while (filledQuestions.length < total) {
               filledQuestions.push(null);
             }
@@ -184,7 +186,13 @@ export const UnifiedTestEditor = () => {
              const hasCorrect = clean.options.some((o: any) => o.id === clean.correctOptionId);
              if (!hasCorrect) continue;
 
-             validQuestions.push(clean);
+             const apiPayload = mapDraftToApi(clean, {
+               subject: testData.subjectId,
+               topic: clean.topicId || (testData.topicIds && testData.topicIds[0]?.value) || undefined,
+               sub_topic: clean.subTopicId || (testData.subTopicIds && testData.subTopicIds[0]?.value) || undefined,
+               difficulty: clean.difficulty || testData.difficulty || 'medium',
+             });
+             validQuestions.push(apiPayload);
           }
         }
           
@@ -351,7 +359,13 @@ export const UnifiedTestEditor = () => {
              throw new Error(`Question ${i + 1}'s Correct Answer is pointing to an empty or deleted option.`);
            }
 
-           validQuestions.push(clean);
+           const apiPayload = mapDraftToApi(clean, {
+               subject: testData.subjectId,
+               topic: clean.topicId || (testData.topicIds && testData.topicIds[0]?.value) || undefined,
+               sub_topic: clean.subTopicId || (testData.subTopicIds && testData.subTopicIds[0]?.value) || undefined,
+               difficulty: clean.difficulty || testData.difficulty || 'medium',
+           });
+           validQuestions.push(apiPayload);
         }
       }
         

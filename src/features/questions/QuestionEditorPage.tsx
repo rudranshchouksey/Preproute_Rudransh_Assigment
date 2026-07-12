@@ -8,6 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Skeleton } from '../../components/ui/Skeleton';
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import type { QuestionDraft, BulkQuestionPayload } from './types';
+import { mapApiToDraft, mapDraftToApi } from './utils';
 
 export const QuestionEditorPage = () => {
   const { id } = useParams();
@@ -40,7 +41,8 @@ export const QuestionEditorPage = () => {
           const qRes = await api.post('/questions/fetchBulk', { question_ids: data.questionIds });
           const fetchedQuestions = Array.isArray(qRes.data) ? qRes.data : qRes.data.data || [];
           
-          const filledQuestions = [...fetchedQuestions];
+          const mappedQuestions = fetchedQuestions.map((q: any) => mapApiToDraft(q));
+          const filledQuestions = [...mappedQuestions];
           // Pad with nulls up to total
           while (filledQuestions.length < total) {
             filledQuestions.push(null);
@@ -99,9 +101,9 @@ export const QuestionEditorPage = () => {
     setError('');
     
     try {
-      const payload: BulkQuestionPayload = {
+      const payload: any = {
         testId: id!,
-        questions: questions
+        questions: questions.map(q => mapDraftToApi(q, {}))
       };
       
       await api.post('/questions/bulk', payload);
