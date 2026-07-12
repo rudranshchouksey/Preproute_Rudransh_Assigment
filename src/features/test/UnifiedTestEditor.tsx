@@ -376,15 +376,15 @@ export const UnifiedTestEditor = () => {
         subject: testData.subjectId,
         ...(testData.topicIds && testData.topicIds.length > 0 ? { topics: testData.topicIds.map((t: Option) => t.value) } : {}),
         ...(testData.subTopicIds && testData.subTopicIds.length > 0 ? { sub_topics: testData.subTopicIds.map((t: Option) => t.value) } : {}),
-        total_time: Number(testData.duration),
-        total_questions: Number(testData.numQuestions),
-        total_marks: Number(testData.totalMarks),
+        total_time: Number(testData.duration) || 60,
+        total_questions: Number(testData.numQuestions) || 10,
+        total_marks: Number(testData.totalMarks) || 10,
         difficulty: testData.difficulty === 'difficult' ? 'hard' : (testData.difficulty || 'medium').toLowerCase(),
         status: mode === 'draft' ? 'draft' : 'draft', // Live is set in publish page
-        type: testType,
-        correct_marks: Number(testData.markingCorrect),
-        wrong_marks: Number(testData.markingWrong),
-        unattempt_marks: Number(testData.markingUnattempted)
+        type: testType || 'chapterwise',
+        correct_marks: Number(testData.markingCorrect ?? 5) || 5,
+        wrong_marks: Number(testData.markingWrong ?? -1) || -1,
+        unattempt_marks: Number(testData.markingUnattempted ?? 0) || 0
       };
 
       let testId = id;
@@ -653,11 +653,13 @@ export const UnifiedTestEditor = () => {
                 <div className="w-[551px] h-[87px] flex flex-row items-end pb-[1px] gap-[50px]">
                   <div className="w-[250.5px] flex flex-col gap-[15px]">
                     <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">No of Questions</label>
-                    <input type="number" {...registerTest("numQuestions", { valueAsNumber: true })} placeholder="Ex:250 Marks" className="w-[250.5px] h-[48px] bg-white border border-[#D1D5DB] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
+                    <input type="number" {...registerTest("numQuestions", { required: "Number of questions is required", valueAsNumber: true })} placeholder="Ex: 10" className="w-[250.5px] h-[48px] bg-white border border-[#D1D5DB] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
+                    {testErrors.numQuestions && <span className="text-red-500 text-xs">{(testErrors.numQuestions as any).message}</span>}
                   </div>
                   <div className="w-[250.5px] flex flex-col gap-[15px]">
-                    <label className="text-[16px] font-medium text-[#D1D5DB] leading-[150%] h-[24px]">Total Marks</label>
-                    <input type="number" {...registerTest("totalMarks", { valueAsNumber: true })} placeholder="Ex:250 Marks" className="w-[250.5px] h-[48px] bg-white border border-[#D1D5DB] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
+                    <label className="text-[16px] font-medium text-[#374151] leading-[150%] h-[24px]">Total Marks</label>
+                    <input type="number" {...registerTest("totalMarks", { required: "Total marks is required", valueAsNumber: true })} placeholder="Ex: 250" className="w-[250.5px] h-[48px] bg-white border border-[#D1D5DB] rounded-[8px] px-[16px] py-[12px] text-[16px] font-medium text-[#374151] placeholder:text-[#D1D5DB] outline-none focus:border-blue-500" />
+                    {testErrors.totalMarks && <span className="text-red-500 text-xs">{(testErrors.totalMarks as any).message}</span>}
                   </div>
                 </div>
 

@@ -40,8 +40,8 @@ api.interceptors.response.use(
       // Deep logging for 400 Bad Request to trace exact cause
       console.error("❌ 400 Bad Request Error Intercepted!");
       console.error("Target URL:", error.config?.url);
-      console.error("Payload Sent:", JSON.parse(error.config?.data || '{}'));
-      console.error("Backend Response:", error.response?.data);
+      console.error("Payload Sent:", JSON.stringify(error.config?.data ? JSON.parse(error.config.data) : {}, null, 2));
+      console.error("Backend Response:", JSON.stringify(error.response?.data, null, 2));
 
       // Attempt to extract specific validation messages
       const resData = error.response?.data;
@@ -50,20 +50,24 @@ api.interceptors.response.use(
         if (resData.field && resData.message) {
            error.message = `${resData.field}: ${resData.message}`;
         }
-        // If it's a generic message property
-        else if (resData.message) {
+        // If it's a generic message property (but not just 'Validation failed' if we have detailed errors)
+        else if (resData.message && (!resData.errors || resData.errors.length === 0)) {
            error.message = resData.message;
         } 
         // If it's an array of errors (Zod / Express Validator)
-        else if (Array.isArray(resData.errors) && resData.errors.length > 0) {
+        if (Array.isArray(resData.errors) && resData.errors.length > 0) {
            const firstError = resData.errors[0];
+           const field = firstError.path || firstError.param || 'unknown_field';
+           const msg = firstError.msg || firstError.message || JSON.stringify(firstError);
+           
+           error.message = `Validation Error on '${field}': ${msg}`;
+           
            // Overwrite response data entirely with exact object requested by user
            error.response.data = {
              success: false,
-             field: firstError.path || firstError.param || 'unknown_field',
-             message: firstError.msg || firstError.message || JSON.stringify(firstError)
+             field: field,
+             message: error.message
            };
-           return Promise.reject(error);
         }
       }
     }
